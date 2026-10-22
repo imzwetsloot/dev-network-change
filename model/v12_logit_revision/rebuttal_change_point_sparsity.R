@@ -16,6 +16,7 @@ setwd("C:/Users/izwetsl/OneDrive - UvA/Documenten/2 Research/1 Papers/44. Networ
 #cp_setting 
 setting="A"
 
+source('timeconversion.R')
 source('settings_sparsity_cp_robustness.R')
 
 
@@ -55,16 +56,12 @@ opts <- list(progress = progress)
 
 outputfolder="revision_cp_sparsity"
 
-df.result<-data.frame(
-  Name  = files[1],
-  total.ones = NA,
-  window= NA
-)
+list.results = vector("list", n.files)
 
-list.results = for(l in 1:n.files){
-  
+for(l in 1:n.files){
+
   output.vector = read.csv(paste0(folder,"/inputmatrix/",files[l]))
-  output.vector = output.vector[,1] 
+  output.vector = output.vector[,4] #X_ii or X_ij (col 1 = row names, col 2-3 = period_num, unix)
   
   ### rolling window to identify possible change points (candidates)
   window.start = seq(from= Lags*24*60/Aggregationmin,
@@ -75,18 +72,21 @@ list.results = for(l in 1:n.files){
   number.windows = length(window.start)
    
 
-  for(current.window in window.start){
-    
+  numb.ones = rep(NA, number.windows)
+  for(w in 1:number.windows){
+    current.window = window.start[w]
     regress.window.full.start = 1 + current.window
     regress.window.full.end = min(rolling.window + current.window, n.period)
     regress.window = regress.window.full.start:regress.window.full.end
-    numb.ones = sum(output.vector[regress.window] == 1)
-    df.result<-rbind(df.result, data.frame(Name=files[l],total.ones=numb.ones,window=current.window))
-    
+    numb.ones[w] = sum(output.vector[regress.window] == 1)
   }
-}  
- 
-saveRDS(df.result,file=paste0(folder,"/", outputfolder,"/cpsettings_sparcity_setting",setting,".RData"))
+  list.results[[l]] = data.frame(Name=files[l],total.ones=numb.ones,window=window.start)
+  setTxtProgressBar(pb, l)
+}
+
+df.result = do.call(rbind, list.results)
+
+saveRDS(df.result,file=paste0(folder,"/", outputfolder,"/cpsettings_sparcity_setting",setting,".Rds"))
 
 close(pb)
 
