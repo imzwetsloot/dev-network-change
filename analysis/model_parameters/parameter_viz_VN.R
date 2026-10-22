@@ -1,7 +1,6 @@
 ################
 ##This code visualizes the change in model parameters at the change points for the VN
-## figure 1: bars activated / deactivated / strengthened / weakened
-## figure 2: ratio of parameters before and after the change points
+## figure: bars activated / deactivated / strengthened / weakened
 ## run model_estimates_VN.R first, it creates mat_par_VN.Rds
 ###############
 
@@ -26,10 +25,6 @@ folder3="figures/par_plots"
 #Vuong test to use
 testnames=c("lik","aic","bic")
 vuongtest=testnames[1]
-
-fCount <- function(x){
-  length(which(x!=0))
-}
 
 #############################################################################
 ##################Create figure bars activate not activate ####
@@ -120,107 +115,3 @@ plot(fig)
 dev.off()
 plot(fig)
 
-############################################################
-##################Create figure Ratio paragmerter before and after CPS ####
-###########################################################
-
-#create df4: one row per node x model x nonzero parameter (as in model_estimates_VN.R)
-mat.par <- readRDS(paste0(folder2,"/",folder,"/parameters/",vuongtest,"/mat_par_VN.Rds"))
-
-parnames <- colnames(mat.par[,5:ncol(mat.par)])
-parnamesfull <-parnames
-parnamesfullordered<-parnamesfull[c(1, #a0
-                                  2,9,16,23,30, #Xii
-                                  4,11,18,25,32, #Di
-                                  6,13,20,27,34, #Dout
-                                  7,14,21,28,35, #Dout other
-                                  5,12,19,26,33, #ACthr
-                                  3,10,17,24,31, #Ac
-                                  8,15,22,29,36, #AC24
-                                  37, #dWLSopen
-                                  c(38:61))] #hours
-
-zero.col=which(colSums(mat.par)==0)
-mat.par<-mat.par[,-zero.col]
-parnames<-parnames[-(zero.col-4)]
-mat.par[mat.par==0]=NA
-
-df2 <-data.frame(par = parnames,n=NA,No=NA)
-for(i in 1:nrow(df2)){
-  df2$n[i]=fCount(mat.par[,df2$par[i]])
-}
-df2<-df2%>%
-  mutate(No=ifelse(n>100,"n>100",ifelse(n>10,"10<n<=100",ifelse(n>5,"5<n<=10","2<n<=5"))))%>%
-  mutate(No=factor(No, levels=c("2<n<=5","5<n<=10","10<n<=100","n>100")))
-
-df3<-  mat.par %>%
-    gather(par, value,-c("inf","model","start","end"))%>%
-    filter(!is.na(value))
-df4<- left_join(df3,df2,by="par")
-df4 <- df4%>%
-  mutate(par=factor(par, levels=parnamesfullordered))
-#add rows to df4 with the zero col
-row=df4[1,]; row[1:8]=NA
-for(i in 1:length(zero.col)){
-  row$par = names(zero.col[i])
-  row$n = 0
-  df4<-rbind(df4,row)
-}
-
-#create grouped variable names
-df4 <- df4 %>%
-  mutate(
-    par_group = sub("\\.[0-9]+$", "", par),                          # Xii.3 -> Xii
-    par_group = if_else(grepl("^hr[0-9]+$", par_group), "hour", par_group)  # hr1..hr24 -> hour
-  ) %>%
-  mutate(par_group = factor(par_group,
-                            levels = c("a0", "Xii", "AC", "Din", "ACthr", "Dout", "Doutother", "AC24", "dWLSopen", "hour")))
-
-df_prev <- df4 %>%
-  transmute(inf, par, par_group, model = model + 1, value_prev = value)
-
-df_ratio <- df4 %>%
-  filter(model %in% c(2, 3)) %>%
-  left_join(df_prev, by = c("inf", "par", "model", "par_group")) %>%
-  mutate(
-    ratio = if_else(is.na(value_prev), NA_real_, value / value_prev)  # ratio vs previous model
-  )
-
-df_ratio %>%
-  filter(!is.na(ratio), is.finite(ratio)) %>%      # drop NA / Inf from zero denominators
-  ggplot(aes(x = par_group, y = ratio)) +
-  geom_hline(yintercept = 1, linetype = "dashed", colour = "grey50") +  # ratio = 1: no change
-  geom_boxplot(outlier.size = 1) +
-  labs(x = "Parameter", y = "Ratio (model k / model k-1)") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
-
-plot_df <- df_ratio %>%
-  filter(!is.na(value), is.finite(value)) %>%
-  group_by(par_group) %>%
-  mutate(
-    n = n(),
-    No = cut(n,
-             breaks = c(-Inf, 4, 10, 100, Inf),
-             labels = c("n<5", "5<=n<=10", "10<n<=100", "n>100"))
-  ) %>%
-  ungroup()
-
-
-file.fig = paste0(folder3,"/",folder,"/fig_vn_parameters_before_after_cp.png")
-png(file.fig,width=600,height=300)
-
-
-fig<- plot_df %>%
-  ggplot(aes(x = par_group, y = value, fill = No)) +
-  geom_hline(yintercept = 1, linetype = "dashed", colour = "grey50") +
-  geom_boxplot(outlier.size = 1) +
-  scale_fill_manual(values = c("steelblue1", "steelblue2", "steelblue3", "steelblue4"),
-                    drop = FALSE, name = "Data points") +
-  labs(x = "Parameter", y = "Ratio (model k / model k-1)") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-plot(fig)
-dev.off()
-plot(fig)
