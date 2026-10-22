@@ -93,7 +93,7 @@ grp_labels <- c(Xii = "Own lag (Xii)", AC = "Overall activity (AC)", Din = "In-d
 cat_cols <- c(Deactivated = "#c94a17", Weakened = "#f5b48f",
               Activated = "#1f5fae", Strengthened = "#8db8ea")
 
-file.fig = paste0(folder3,"/",folder,"/fig_nvn_parameters_before_after.png")
+file.fig = paste0(folder3,"/",folder,"/fig_vn_parameters_before_after.png")
 png(file.fig,width=600,height=1000)
 
 # create plot
