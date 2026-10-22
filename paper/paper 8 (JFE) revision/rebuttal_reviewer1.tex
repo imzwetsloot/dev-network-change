@@ -1,0 +1,112 @@
+\documentclass[11pt]{article}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{mdframed}
+\usepackage{parskip}
+\usepackage{times}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+
+\geometry{margin=2.5cm}
+\definecolor{commentbg}{gray}{0.93}
+
+\newmdenv[backgroundcolor=commentbg, linewidth=0pt, innerleftmargin=10pt, innerrightmargin=10pt, innertopmargin=6pt, innerbottommargin=6pt]{commentbox}
+\newcommand{\reviewercomment}[1]{\begin{commentbox}\textit{#1}\end{commentbox}}
+\newcommand{\ourresponse}[1]{\textbf{Our response:} #1}
+\newcommand{\addedtext}[1]{\textit{``#1''}}
+
+\begin{document}
+
+\begin{center}
+  {\Large \textbf{Response to Reviewer 1}}\\[0.5em]
+  {\large Reddit users unleashed - understanding user behaviour and
+  	their impact on meme stocks}\\[0.3em]
+  {\small \today}
+\end{center}
+
+\vspace{1em}\hrule\vspace{1.5em}
+
+Dear Reviewer,
+
+Thank you for going once more through our manuscript. We were glad to read that you were so positive about the revised version. The two additional remarks you mention are good points and we addressed them in this round of revision. We hope you enjoy reading the new version of the manuscript. Just as in the former round, to make things easier, we summarise below how we reacted to the two comments.
+
+\bigskip
+
+% -------------------------------------------------------
+\textbf{Major Comment 1:}
+
+\reviewercomment{%
+\textit{Contribution relative to the econometric literature.} The paper proposes a new econometric framework (ISBM), but the novelty of the methodological contribution relative to existing approaches could be articulated more clearly. The framework combines several components—logistic regression models for link prediction in networks, change-point detection methods, and autoregressive models linking network variables to financial outcomes. It would therefore be helpful if the authors clarified more explicitly what the main methodological contribution of the ISBM framework is, how it diﬀers from existing dynamic network models, and whether the proposed change-point procedure introduces any new econometric challenges. More generally, given the journal’s focus, the paper could benefit from a more rigorous and compact presentation of the econometric methodology, ideally in a more general form that could be adapted to diﬀerent empirical applications beyond the specific setting studied in the paper. 
+}
+
+\ourresponse{A
+}
+
+\bigskip
+
+% -------------------------------------------------------
+\textbf{Major Comment 2:}
+
+\reviewercomment{%
+\textit{Identification and causal interpretation.} The distinction between influential and non-influential users appears somewhat arbitrary, and it would be helpful to see additional robustness checks to assess how sensitive the results are to this classification (beyond 10\% thresholding). In particular, prominent users (such as Keith Gill) may generate substantial attention within the network alone, and should be controlled for/ be partialed out. 
+}
+
+\ourresponse{
+\textcolor{red}{Inez computed the CPs. Simon ran the finance analysis for the onlyKG, onlyMod, rest. Results are as expected. Keith hardly contributes, but his followers do. The rest influencers drive the results and their followers contribute still quite some, but of course not as much as keith followers}
+}
+
+\bigskip
+
+% -------------------------------------------------------
+\textbf{Major Comment 3:}
+
+\reviewercomment{%
+	\textit{Interpretation of the main empirical findings.} One of the most intriguing findings of the paper is that behavioral changes among less influential users account for a larger share of market dynamics than those among influential users. While this result is interesting, the paper could benefit from a deeper discussion of the mechanisms behind it. At the same time, the results suggest a timing gap between influencers and the broader user base: influential users appear to change their behavior earlier—sometimes weeks before the market frenzy—while the crowd’s collective behavior is associated with more immediate market reactions. This raises the question of whether influencers and followers operate on diﬀerent information sets or whether information diﬀuses through the network over time (spillover eﬀects).
+}
+
+\ourresponse{
+	A
+}
+
+\bigskip
+
+% -------------------------------------------------------
+\textbf{Major Comment 4:}
+
+\reviewercomment{%
+	\textit{Model scalability, robustness and sparsity.} While the authors emphasize the computational feasibility of the approach, the discussion of the underlying assumptions that make the estimation tractable remains limited. (i) The sparsity assumptions imposed on the network links appear to play a key role in reducing the dimensionality of the problem, yet it is not entirely clear how sensitive the results are to these assumptions or whether alternative sparsity structures would lead to similar conclusions. (ii) The number of parameters increases rapidly once the change-point specification is introduced, as it requires estimating multiple parameter matrices across regimes. The objective function for estimating these is not explicitly stated. A clearer discussion of the computational complexity and the role of sparsity—possibly including robustness checks—would help clarify the scope of the methodology and guide practitioners interested in applying the framework in other large-dimensional network settings.
+}
+
+\ourresponse{
+	A
+}
+
+\bigskip
+
+% -------------------------------------------------------
+\textbf{Comment: Data Construction}
+
+\reviewercomment{%
+	Several aspects of the data construction require clarification:	
+	\begin{itemize}
+		\item The data description should state the source of intraday GME price data.
+		\item How are multiple comments occurring within the same hour handled?
+		\item How are comments in the same thread encoded in the directed network structure?
+	\end{itemize}
+}
+
+\ourresponse{
+	A
+}
+
+\bigskip\bigskip
+
+Thank you again for going so thoroughly through our paper and for all the suggestions made during the revision process. We really appreciate it and we believe the manuscript is now in a much better state. 
+
+\bigskip
+Kind regards,\\
+The Authors
+
+\end{document}

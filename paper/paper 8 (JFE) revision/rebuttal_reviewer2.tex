@@ -1,0 +1,296 @@
+\documentclass[11pt]{article}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{mdframed}
+\usepackage{parskip}
+\usepackage{times}
+
+\geometry{margin=2.5cm}
+\definecolor{commentbg}{gray}{0.93}
+
+\newmdenv[backgroundcolor=commentbg, linewidth=0pt, innerleftmargin=10pt, innerrightmargin=10pt, innertopmargin=6pt, innerbottommargin=6pt]{commentbox}
+\newcommand{\reviewercomment}[1]{\begin{commentbox}\textit{#1}\end{commentbox}}
+\newcommand{\ourresponse}[1]{\textbf{Our response:} #1}
+\newcommand{\addedtext}[1]{\textit{``#1''}}
+
+\begin{document}
+
+\begin{center}
+  {\Large \textbf{Response to Reviewer 2}}\\[0.5em]
+  {\large Reddit users unleashed - understanding user behaviour and
+  	their impact on meme stocks}\\[0.3em]
+  {\small \today}
+\end{center}
+
+\vspace{1em}\hrule\vspace{1.5em}
+
+Dear Reviewer,
+
+Thank you for going once more through our manuscript. We were glad to read that you were so positive about the revised version. The two additional remarks you mention are good points and we addressed them in this round of revision. We hope you enjoy reading the new version of the manuscript. Just as in the former round, to make things easier, we summarise below how we reacted to the two comments.
+
+\bigskip
+
+% -------------------------------------------------------
+\textbf{Comment:}
+
+\reviewercomment{%
+	The paper at hand studies the relationship between individual user behaviour on the Reddit subreddit WallStreetBets and the market dynamics of the GameStop (GME) stock during the meme stock frenzy (and before and after). The authors propose an Interpretable Social Network and Market Behaviour modelling approach (ISMB), which combines logistic
+	regression for link prediction at the node-pair level with LASSO and a change point detection algorithm. The approach identifies when individual users change their posting
+	behaviour and aggregates these behavioural shifts into variables that are then linked to hourly and 5-minute returns, integrated volatility, and jump volatility of GME. The main findings are: (1) followers of influential users are more relevant for market dynamics than the influencers themselves, (2) influential users change their behaviour well before the market frenzy, and (3) the aggregated change point variables explain a meaningful share of market movements, outperforming standard network activity measures. The paper makes a genuine contribution. The idea of modelling the social network at the individual user level, identifying structural breaks in posting behaviour, and linking those breaks to financial market outcomes is novel and well-motivated. The ISMB framework is methodologically interesting and the scale of the data collection (3.8 million posts, 502,650 users) is impressive. However, the paper requires substantial revision along several dimensions, which I outline below.
+}
+
+\ourresponse{A
+}
+
+\bigskip
+
+% -------------------------------------------------------
+\textbf{Major Comment 1:}
+
+\reviewercomment{%
+	The authors repeatedly position their work against studies that use aggregated network metrics. This is a fair motivation, because their individual-level modelling does reveal things that aggregate post counts do not (e.g., the timing of behavioural shifts across user types, the heterogeneity in parameter estimates). However, the market-impact analysis in Equation (7) uses $CP_{VN}$ and $CP_{ANVN}$, which are themselves aggregates: counts of change points per hour across all nodes. So the final link between the network and the
+	market is also an aggregated analysis. The authors do not look at individual trading behaviour. In my reading, the advantage of the ISMB approach is not that it avoids aggregation, but
+	that the aggregated variable is derived from individual-level modelling and therefore captures changes that a raw post count would miss. The framing should reflect this distinction more clearly rather than implying that the paper looks at the individual level throughout.
+}
+
+\ourresponse{
+	A
+}
+
+\bigskip
+
+% -------------------------------------------------------
+\textbf{Major Comment 2.1:}
+
+\reviewercomment{%
+	The paper repeatedly claims to study "changes in users' beliefs" following the DeGroot/Pedersen framework, but what the change point model actually captures is a structural shift in the parameters of a logistic link-prediction model on the communication probability between two nodes. This is not the same as a belief update. The mapping from estimated parameter shifts to belief changes is asserted but never really justified. The authors should be precise about what their measure captures (ideally already in the introduction). A change point means that the statistical relationship between the explanatory variables and the reaction probability has shifted. That is an interesting finding by itself, but calling it a change in beliefs overstates the interpretation. 
+}
+
+\ourresponse{
+	\textcolor{red}{We stated this twice in the intro. I took both out and wrote instead `behavioural change'. We use this lingo in the rest of the intro. WE NEED TO CHECK IF THE NEW SENTENCES ARE STILL A CORRECT STATEMENT ABOUT THE IMPLICATIONS OF THE PEDERSEN FRAMEWORK}
+}
+
+\bigskip
+
+% -------------------------------------------------------
+\textbf{Major Comment 2.2:}
+
+\reviewercomment{%
+	Related: The authors filter out the vast majority of users due to infrequent posting (only 28.1\% posted four or more messages), which is a necessary step for estimation but means the analysis covers a selected subset of the network. Many users are lurkers who read but never post and may still trade based on what they read. This selection issue should be acknowledged and discussed.
+}
+
+\ourresponse{
+	A
+}
+
+\bigskip
+
+% -------------------------------------------------------
+\textbf{Major Comment 3:}
+
+\reviewercomment{%
+	The paper does not cite Allen et al. (2025). This paper studies the same January 2021 meme stock events, uses social media data from Reddit, Twitter, and StockTwits, and examines the link between social media activity, retail trading, and market outcomes. It provides detailed evidence on the securities lending market, options market activity, and market quality effects. The approaches are complementary: Allen et al. use aggregated mentions and a cross-sectional approach across 13 meme stocks, while this paper models the network at the individual level for a single stock. This comparison should be discussed. It would also strengthen the motivation for the individual-level approach, since it would clarify exactly what the ISMB framework adds relative to the aggregate analysis in Allen et al. (2025). 
+}
+
+\ourresponse{
+	A
+}
+
+\bigskip
+
+% -------------------------------------------------------
+\textbf{Major Comment 4.1:}
+
+\reviewercomment{%
+	Regarding the Market impact regression, I have several issues.
+	(a) It is unclear to me from the table notes whether lagged return variables are included in all six model specifications or only in some. The note says "insignificant variables and significant lagged return variables are not displayed," which is ambiguous. The authors should confirm that all models include the same baseline controls. Maybe by adding an extra row? 
+}
+
+\ourresponse{
+	\textcolor{red}{I added such a row to every Table. Code is written but the Tables are not yet in the paper.}
+}
+
+\bigskip
+
+% -------------------------------------------------------
+\textbf{Major Comment 4.2:}
+
+\reviewercomment{%
+	(b) The coefficients are not interpreted economically. For example, VN3 in Table 5 equals -0.015, which means a change point of a vital node at lag 3 is associated with a negative
+	return. This seems counterintuitive given the paper's narrative that VN behavioural change contributes to price increases, and it needs discussion. That the VN coefficients are much larger in absolute terms than the ANVN coefficients (which are on the order of 0.0001) likely reflects the fact that the VN variable takes much smaller values (few change points per hour, as shown in Figure 7), whereas the ANVN variable aggregates over tens of thousands of users. Without standardization or a discussion of units and scaling, the reader cannot assess relative economic importance. This is important because the authors argue that VNs play a central role but that their behavioural change explains less of the market dynamics than ANVNs. The coefficients should be discussed in a way that makes this argument clear. 
+}
+
+\ourresponse{
+	\textcolor{red}{I investigated and added log scaling to the VN and NVN cp variables. I looked through the Tables (superficially) and I noticed a few additional significant parameters. No "complete change" visible. We have to reinterpret therefore. Tables are not yet in the paper, but Code to produce them is written. PART ABOUT BETTER AND ECONOMICAL INTERPRETATION NOT ADDRESSED YET}
+}
+
+\bigskip
+
+% -------------------------------------------------------
+\textbf{Major Comment 4.3:}
+
+\reviewercomment{%
+	(c) As a robustness check, I would like to see the regressions re-estimated including only the variables that are statistically significant in the full model. With the large number of lags and variables, there is a risk that the high R-squared values are driven less by the statistical significant values but by just the entire set of explanatories. 
+}
+
+\ourresponse{
+	\textcolor{red}{Code is done and all robustness Tables for when we use only significant parameters in the regression are created and pushed to GitHub. Including for Trading Volume and Options. Can embed at a later stage to the paper}
+}
+
+\bigskip
+
+% -------------------------------------------------------
+\textbf{Major Comment 5:}
+
+\reviewercomment{%
+	The ISMB framework identifies when behaviour changes, but says very little about how it changes. Which parameters shift at the change point? Does the sensitivity to trading hours increase? Does the coefficient on the VN's activity become larger? The model produces this information but the paper largely ignores it. A discussion of what characterizes the behavioural shifts would substantially enrich the paper and provide more direct evidence for the Pedersen framework. 
+}
+
+\ourresponse{
+	A
+}
+
+\bigskip
+
+% -------------------------------------------------------
+\textbf{Major Comment 6:}
+
+\reviewercomment{%
+	Lastly, the network activity (AC) is included as a feature in the link-prediction models (Equations 2 and 3). If the coefficient on AC is among the parameters that shift at the change point, then the change point variable may absorbs the information about network activity. This could explain why AC loses significance in the market regressions once CP variables are included, but it would not necessarily mean that individual behaviour change is fundamentally more informative than aggregate activity. The authors should address this. 
+}
+
+\ourresponse{
+	A
+}
+
+
+\bigskip
+
+% -------------------------------------------------------
+\textbf{Minor Comment 1:}
+
+\reviewercomment{%
+	The paper needs significant editorial work. 
+		\begin{itemize}
+			\item[(a)] The introduction is repetitive. The main findings and the Pedersen/DeGroot framework are stated multiple times. A tighter introduction that motivates the gap, states the
+			contribution once, and moves on would improve readability considerably. 
+			\item[(b)] Section 2 ("Theory and Related Works") is largely repetitive to the intro. Either merge it into the intro or restructure it so that the intro provides the motivation and Section 2 delivers the formal theoretical backbone without overlap.
+			\item[(c)] The four stated contributions at the end of Section 1 overlap. Contributions I (empirical backing of Pedersen) and IV (quantifying the impact of social networks on financial markets) are essentially the same claim from different angles. 
+			\item[(d)] I love the following sentence: "It is also remarkable that classical network measures [...] were unable to explain market movements as good as our designed change point variables". Regardless, I would tone it down. 
+			\item[(e)] Consistency issues throughout: "U.S." vs. "US," references to "Appendix 6" when the appendix sections are lettered A through F, and other formatting issues.
+			\item[(f)] Several sentences are unnecessarily long and would benefit from splitting. 
+		\end{itemize}
+}
+
+\ourresponse{
+	%\textcolor{blue}{Simons want to give this one a first dash in the coming week} \\
+	\textcolor{red}{(a) and (b) I gave this one a first dash. I took out half of the former introduction (after paragraph 3) and replaced it with the literature review, plus relevant additions. The literature review was much better written than what we had in the intro. I wont say that it is a done thing now. I rather pinned the elements logically together. LATER ON, A FRESH READ THROUGH IT WILL BE NECESSARY.} \\
+	\textcolor{red}{As said above, I merged it into the introduction and therefore took the literature review section out.} \\
+	\textcolor{red}{(c) I put parts of contribution 4 into 1 and made them clearly distinct.} \\
+	\textcolor{red}{(d) I toned down this sentence even though I hate it is gone... Same as the reviewer, I loved this sentence. } \\
+	\textcolor{red}{(e) and (f) CONCERNS THE FULL DOCUMENT AND MAKES SENSE TO GO THROUGH AFTER ALL ELSE IS DONE.}
+}
+
+\bigskip
+
+% -------------------------------------------------------
+\textbf{Minor Comment 2:}
+
+\reviewercomment{%
+	The source of the stock price data is not stated anywhere in the paper. Additionally, given that the GME frenzy was characterized by extreme trading volume, analyzing volume next to returns and volatility would be an interesting extension and would strengthen the paper.
+}
+
+\ourresponse{
+	\textcolor{red}{I think we got the data from AlphaVantage. But better to double check if it was not DataStream. For trading volume, code is written including robustness analysis and Tables are created. I also bought the options data, wrote the necessary code, and created the Tables. So far, only hourly is done. I need to buy a second data package for 5 minute analysis. The results are not earth shattering, but "stronger" than the trading volume findings. The Referee will appreciate the addition, I am sure. }
+}
+
+\bigskip
+
+% -------------------------------------------------------
+\textbf{Minor Comment 3:}
+
+\reviewercomment{%
+	Personally, I find the terminology "vital nodes" and "non-vital nodes" (and "admissible non-vital nodes") is a bit cumbersome. Terms like "influencers" and "followers" would be more intuitive and are already used informally in the paper and in the literature the authors cite. 
+}
+
+\ourresponse{
+	A
+}
+
+\bigskip
+
+% -------------------------------------------------------
+\textbf{Minor Comment 4:}
+
+\reviewercomment{%
+	In Figure 2, the scatter plot (right panel) has a cluster of zero returns on weekends and holidays. Weekly returns might be a better choice for illustration purposes. 
+}
+
+\ourresponse{
+	A
+}
+
+\bigskip
+
+% -------------------------------------------------------
+\textbf{Minor Comment 5:}
+
+\reviewercomment{%
+	The reverse causality test is limited. The test only rules out a specific form of reverse causality (returns Granger-causing change points at hourly frequency). It does not address the possibility that both change points and returns are driven by common unobserved factors such as news events or specific posts by Keith Gill. The authors mention key events in Figure 8 but do not formally control for them. Including event dummies or discussing this limitation would strengthen the section. From a robustness and “causality” perspective, a placebo test with a completely unrelated stock would also make sense to show that the discussion/change points are really idiosyncratic to GME. 
+}
+
+\ourresponse{
+	\textcolor{red}{Events are added by web scraping them from gmetimeline (see references). Following the scaling, we have significant parameters over the full sample. But actually, it makes way more sense to look at this from a regime perspective. So I implemented that.}
+	\textcolor{red}{I was contemplating if we have to change then the entire analysis (core results) to a before/during/after study. I played around with the numbers and results add nothing the rolling window does not provide already. We have to motivate then well, why we do in the robustness study the before / during / after. I'd say, since we also have the rolling window analysis, the before / during / after is a good compromise between the full set and a granular rolling window. If we argue as such, I believe it will be fine. I added this like described to the paper.}
+	\textcolor{red}{Regarding the Placebo test, I implemented the code and tested a few stocks. Almost always I found a R2 and adj R2 increase from our variables and some significant ones. That is not surprising, after all we deal with large data and then something unrelated is always significant. I identified 3 stocks, MMM GE CSCO, for which the increase in R2 and adj R2 is reasonable and comparable. I am thinking of including a Table showing the R2 and adj R2 of these 3 stocks. I did this and wrote the accompanying description. }
+}
+
+\bigskip
+
+% -------------------------------------------------------
+\textbf{Minor Comment 6:}
+
+\reviewercomment{%
+	The change point detection parameters (window size of 2 months, step size of 1 week, minimum distance of 1 week between change points) are chosen somewhat arbitrary. A sensitivity analysis (similar to the VN definition) varying these parameters would be useful. 
+}
+
+\ourresponse{
+	\textcolor{blue}{Inez will look into the potential variations and what makes sense computationally. We will discuss next week for which ones we will go with. May run a while, up to 2 months}
+}
+
+\bigskip
+
+% -------------------------------------------------------
+\textbf{Minor Comment 7:}
+
+\reviewercomment{%
+	The choice of the LASSO parameter and the cross-validation procedure are not discussed. In a time-series setting, standard i.i.d. cross-validation is inappropriate. The authors should clarify how cross-validation is implemented. 
+}
+
+\ourresponse{
+	\textcolor{red}{I setup a code with which we can conduct time series cross validation. I am still testing the runtime to choose a suitable setup. }
+}
+
+\bigskip
+
+% -------------------------------------------------------
+\textbf{Minor Comment 8:}
+
+\reviewercomment{%
+	The 5-minute analysis (Section 5.3.2 and Appendix D/E) finds weaker results during the frenzy period and attributes this to external events (e.g., the Robinhood trading ban). This part needs a bit more substance or framing. For example, for the hour-by-hour the authors only find VN3 and 4 significant for the return. Those two are not even covered in the 5min regression (only 12 lags, thus 1h). 
+}
+
+\ourresponse{
+	\textcolor{red}{I wrote the necessary code to add the hourly variables to the 5 minute analysis. This is a really good suggestion by the reviewer. I analysed the results and added tables and description to the paper.}
+}
+
+\bigskip\bigskip
+
+Thank you again for going so thoroughly through our paper and for all the suggestions made during the revision process. We really appreciate it and we believe the manuscript is now in a much better state. 
+
+\bigskip
+Kind regards,\\
+The Authors
+
+\end{document}

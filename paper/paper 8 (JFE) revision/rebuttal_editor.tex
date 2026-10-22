@@ -1,0 +1,101 @@
+\documentclass[11pt]{article}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{mdframed}
+\usepackage{parskip}
+\usepackage{times}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+
+\geometry{margin=2.5cm}
+\definecolor{commentbg}{gray}{0.93}
+
+\newmdenv[backgroundcolor=commentbg, linewidth=0pt, innerleftmargin=10pt, innerrightmargin=10pt, innertopmargin=6pt, innerbottommargin=6pt]{commentbox}
+\newcommand{\reviewercomment}[1]{\begin{commentbox}\textit{#1}\end{commentbox}}
+\newcommand{\ourresponse}[1]{\textbf{Our response:} #1}
+\newcommand{\addedtext}[1]{\textit{``#1''}}
+
+\begin{document}
+
+\begin{center}
+  {\Large \textbf{Response to Associate Editor}}\\[0.5em]
+  {\large Reddit users unleashed - understanding user behaviour and
+  	their impact on meme stocks}\\[0.3em]
+  {\small \today}
+\end{center}
+
+\vspace{1em}\hrule\vspace{1.5em}
+
+Dear Associate Editor,
+
+Thank you for handling our manuscript. We really appreciate the speedy process and thorough review of our manuscript. 
+
+\bigskip
+
+% -------------------------------------------------------
+\textbf{Comment 1:}
+
+\reviewercomment{%
+The paper has genuine promise. The combination of a very large Reddit network, interpretable link models, and change-point analysis is interesting, and the reports correctly note that the contribution could be substantial if it holds. That said, the novelty is not yet isolated cleanly enough relative to the existing dynamic-network and social-media/markets literatures. In particular, the market-link step ultimately uses aggregated counts of change points, so the paper's contribution is better described as constructing richer aggregate variables from individual-level models than as delivering a fully individual-level market-impact design. That distinction needs to be made much more clearly.
+}
+
+\ourresponse{A
+}
+
+% -------------------------------------------------------
+\textbf{Comment 2:}
+
+\reviewercomment{%
+	The identification is the main weakness. The paper repeatedly interprets breaks in the communication model as changes in users' beliefs, but that mapping is asserted more than identified. At present, the evidence is much more convincing as predictive or associational evidence than as causal validation of a belief-updating mechanism. The "vital node"
+	classification is heuristic, even if some threshold robustness is provided, and the role of singular actors such as Keith Gill is not fully dealt with. The reverse-causality exercise is
+	also limited; it does not do much to rule out common shocks, news, or event-driven confounding. That concern is reinforced by the weaker 5-minute return results during the key frenzy window, where the paper itself attributes patterns partly to outside events.
+}
+
+\ourresponse{A
+}
+
+% -------------------------------------------------------
+\textbf{Comment 3:}
+
+\reviewercomment{%
+	A related concern is selection. The empirical design excludes most low-activity users, since only 28.1\% of nodes post four or more messages. That may be necessary computationally, but it limits the strength of claims about "the crowd," especially when lurkers may read and trade without posting. The paper should be more explicit about what
+	population is actually being studied. 
+}
+
+\ourresponse{A
+}
+
+% -------------------------------------------------------
+\textbf{Comment 4:}
+
+\reviewercomment{%
+	The econometric contribution relative to existing dynamic-network models is still blurry; the objective function, sparsity assumptions, cross-validation/LASSO choices, and sensitivity to change-point tuning need fuller and cleaner exposition; and the paper should say more about how behavior changes at the detected breaks, not just when those breaks occur. The reports also rightly note that the current draft needs tighter writing and more careful interpretation of coefficient magnitudes and scaling. 
+}
+
+\ourresponse{A
+}
+
+% -------------------------------------------------------
+\textbf{Comment 5:}
+
+\reviewercomment{%
+	The paper is promising and the issues could be addressed in a revision. A revision would need to sharpen the novelty claim, substantially temper or better justify the causal/belief language, address the role of common shocks and major actors more directly, fully document estimation choices and data construction, and tighten the paper's presentation and positioning in the literature.
+}
+
+\ourresponse{A
+}
+
+\bigskip\bigskip
+
+Thank you again for handling our paper and the suggestions made during the revision process. We really appreciate it and we believe the manuscript is now in a much better state. 
+
+\bigskip
+Kind regards,\\
+The Authors
+
+
+
+
+\end{document}
