@@ -75,6 +75,24 @@ plot_df <- trans %>%
     cat = factor(cat, levels = cat_levels)
   )
 
+# % of the changes that are activations or strengthenings
+# changes = all parameter transitions at a CP that are not Inactive (0 -> 0)
+changes <- trans %>%
+  filter(cat != "Inactive")
+n_changes <- nrow(changes)
+n_up <- sum(changes$cat %in% c("Activated", "Strengthened"))
+print(paste0("NVN: ", n_up, " out of ", n_changes, " changes (",
+             round(100 * n_up / n_changes, 1), "%) are activations or strengthenings"))
+
+# split by type of change and by variable
+print(changes %>%
+        count(cat) %>%
+        mutate(perc = round(100 * n / sum(n), 1)))
+print(changes %>%
+        group_by(par_group) %>%
+        summarize(n_changes = n(),
+                  perc_up = round(100 * mean(cat %in% c("Activated", "Strengthened")), 1)))
+
 #largest bar on either side, used to place the annotations
 xmax <- plot_df %>%
   group_by(par_group, x > 0) %>%
