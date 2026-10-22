@@ -1,0 +1,55 @@
+In Definition 1 we postulate a definition for vital nodes as \emph{those nodes in the network that submit posts in at least 10\% of the weeks and receive the highest 10\% median comments on their posts.} 
+
+Figure \ref{fig:infl_network} shows the network structure of the 64 vital nodes. The node size represents the number of ANVN for that vital node. The edges indicate if a vital node is an ANVN of the other vital node and the edge weights represent number of communications between the two. It is clear that a large number of vital nodes also follow each other and that there is a large variety in the number of ANVNs per vital node. 
+
+
+Definition 1 is a relaxed definition as it only requires posting activity in 5 weeks. To validate if a stricter definition of a vital node would impact the results of the study, we investigate the robustness of the results subject to the definition by rerunning the full analysis while adapting this definition. %and making it more strict. Note that we do not consider more relaxed definitions (ie \% of weeks < 10 and \% median comments > 10) as the current setting is already very relaxed. 
+
+\begin{figure}
+	\caption{This Figure shows the network structure of the 64 vital nodes. The node size represents the number of ANVNs for each vital node. The edges indicate if a vital node is an ANVN of the other vital node and the edge weights represent number of communications between the two. It is clear that a large number of vital nodes also follow each other and that there is a large variety in the number of ANVNs per vital node.}
+	\label{fig:infl_network}
+	\centering
+	\includegraphics[scale = 0.4]{inf_network.png}
+\end{figure}
+
+We amend the VN definition by the posting frequency and amount of comments. We redefine a VN as communicating in at least 15\% and 20\% of the weeks (i.e. more frequently). In addition, the 10\% median comments is also validated by requiring the highest 5\% median comments (making it stricter). We perform the robustness analysis for each combination of the stated values. First, we rerun our algorithm to identify all nodes that qualify as VNs and as ANVNs according to these stricter definitions. Table \ref{tab:robust_vn_def} shows for each of these values how many VNs and ANVNs are identified in the network. The row `Original' shows the values as used Definition 1 which resulted in 64 VNs and 48211 ANVNs. As we become stricter in our definition we see that the number of identified VNs declines, the number of ANVNs only slightly declines.  This implies already that large parts of the communications are focused upon a few highly influential nodes. 
+
+\begin{table}
+	\caption{VN identified when changing Definition 1 (in bold the definition used in the main analysis)}
+	\label{tab:robust_vn_def}
+	\centering
+	\begin{tabular}[t]{l rrrr}
+		\hline \hline
+		Scenario & \% of weeks & \% median comments & No. of VNs & No. of ANVNs\\
+		\hline
+		Robustness: 10-5 & 10 & 5 & 47 & 48149\\
+		Robustness: 15-5 & 15 & 5 & 14 & 48018\\
+		Robustness: 20-5 & 20 & 5 & 9 & 47993\\
+		\textbf{Original: 10-10} & 10 & 10 & 64 & 48211\\
+		Robustness: 15-10 & 15 & 10 & 16 & 48021\\
+		Robustness: 20-10 & 20 & 10 & 9 & 47993\\
+		\hline
+	\end{tabular}
+\end{table}
+
+As we modify the VN definition, the estimated change point sequences (Figure 8) will also alter. We obtain these new change point sequences (equations 5 and 6) and rerun the analysis of linking the change points to the market as modeled in Equation 7. The $R^2$ and adj. $R^2$ of these rerun models are reported in Tables \ref{table_r2_return_robust}, \ref{table_r2_iv_robust}, and \ref{table_r2_jv_robust}. Each row indicates a different definition for the VN identification and the resulting ANVNs (as shown in Table \ref{tab:robust_vn_def}). Hence, we validate if a change in the VN definition and as a result a  change in the number of identified change points, affects the main results of this study. 
+
+%Each table contains the setting `Robustness: 10-10' which is the base setting used in this study. 
+Tables \ref{table_r2_return_robust}, \ref{table_r2_iv_robust}, and \ref{table_r2_jv_robust} show similar results than reported in section 5 (highlighted in bold in each Table). Regardless of the definition for the vital nodes, we observe that the identified change points strongly improve the modelling of the return, integrated variance, and jump volatility. Notably, we observe that for several instances, the base setting of this study, `10-10', leads to a lower $R^2$ and adj. $R^2$ than other settings. This result let us to using `10-10' as the base setting for this study. Hence, we conclude that the results of the study are robust towards the VN definition and that the chosen definition is a conservative choice.
+
+\str{Additional to robustness in the definition of the vital node identification set, we investigate if the information in the set mainly stems from the very influential users Keith Gill or the subreddits Moderator and their followers, or if additional influencers and their followers changes in behaviour also contain informative value for the market variables. We investigate this by estimating the models XXX for return, IV, JV, Trading Volume, and Option Trading Volume with change point variables only reflecting the change points of Keith Gill and his followers, the moderator and his followers, and in a third investigation, all other influencers and their followers. We report the adj. $R^2$ of the model fits in Tables \ref{table_r2_robust_onlyKG}, \ref{table_r2_robust_onlyMod}, \ref{table_r2_robust_rest}. The only models from the main analysis, affected by this change in variables, are model specifications (3), (4), and (6). Model (3) contains the lagged market variables own past with 7 Lags, AC, and VNs change points. Model (4) contains additionally the variable for the change points of the ANVNs and model (6) additionally the network statistics. Note that the JV models do not contain own past lagged variables, as jump volatility is not autoregressive by definition.  }
+
+\str{We observe for the return dynamics, the models containing only the change points of Keith Gill and his followers, results in very low adj. $R^2$ compared to the full analysis. Major effects come from the followers of the subreddits moderator though, while the remaining influencers and their followers still add notably to the return dynamics explainability. The models containing the change points of the two most well-known influencers, Keith Gill and the Moderator, (3), hardly explain the return dynamics though. For the IV, both Keith Gill and moderators change points as well as the change points of their followers, explain the IV dynamics way less than the full set of influencers and followers. The remaining influencers and their followers explain the largest portion of the IV dynamics. For the JV dynamics, all sets of influencers and their followers lead to similar results in terms of adj. $R^2$. For TV, the main analysis showed little explainability from the set of influencers and their followers. We observe equally weak explainability from Keith Gills, moderators, and their followers changes in behaviour, whereas the remaining influencers and their followers explain a comparably larger share of adj. $R^2$. For OTV, no set of influencers and followers adds additional explainability to the adj. $R^2$.}
+
+\str{This robustness study shows that the main results of the study are not driven by two well-known users change in behaviour, but that there are notable effects coming from their followers and lesser known influencers and their followers.}
+
+
+
+\input{table_r2_return_robust.tex}
+\input{table_r2_iv_robust.tex}
+\input{table_r2_jv_robust.tex}
+%\input{table_r2_tv_robust.tex}
+
+\input{table_r2_robust_onlyKG.tex}
+\input{table_r2_robust_onlyMod.tex}
+\input{table_r2_robust_rest.tex}

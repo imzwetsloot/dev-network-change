@@ -1,0 +1,91 @@
+In this part of the appendix we detail how we obtained the WSB network data set. %Various datasets exist on the WSBs network. \citet{lucchini2022reddit} identified 36,128 events of commitment by 30,133 users on WSB from 27 Nov 2020 to 3 Feb 2021. \citet{zheng2021game} collected 6,330,271 posts and 8,666,673 comments published on the subreddit r/WSB from 08 Dec 2020 to 03 Feb 2021. \citet{mancini2022self} rely on 22,099,235 comments and 865,597 posts on WSB from 01 Sep 2019 to 01 Feb 2021. %The Pushshift Reddit dataset, presented by \textit{Baumgartner et al. (2020)}\cite{baumgartner2020pushshift}, includes all the posts and comments published on Reddit between Jun 2005 and Apr 2019. In the meantime, access to the database is restricted to Reddit Moderators. 
+%A dataset focused on GME data across 4 subreddits was presented by \textit{J.J. Han (2022)}\cite{han2022reddit}. 
+%To allow for temporal analysis of the changes in the network we collect a dataset that spans a longer period of time from 01.06.2020 to 31.05.2021 (a full year). Our data contain users, posts, interactions, and publishing time on Reddit, starting from 01.06.2020, 6 months before the first meme stock frenzy (GME) happened. Next we discuss the framework used for collecting and processing data from Reddit based on API and keywords, which can be generalized to other companies, topics of interest, or search queries. The datasets allow for several kinds of analysis, for example analyzing social networks' impact on the markets but also for network modeling, longitudinal network analysis, network monitoring, influencer identification, and bot detection. 
+
+\subsection{Data collection framework}
+\subsubsection*{Data collection}
+The data was obtained via the Reddit Data API. In this section, we describe in detail how the data was collected, processed and what actions were taken to validate the results and algorithms. The process consists of three steps, see Figure \ref{fig_webscraping}. Below we describe each step in detail in its respective subsection.
+
+\begin{figure}[ht]
+	\centering
+	\caption{Webscraping process step-by-step}
+	\label{fig_webscraping}
+	\includegraphics[width=.9\linewidth]{webscraping_process.png}  
+\end{figure}
+
+%Reddit is divided into subreddit's, which are specific online communities and the content associated with it is dedicated to a particular topic. For this study we focus on the subreddit `Wallstreetbets', ie. /r/wallstreetbets, focused on discussions about stock and option trading, which was the central platform for communication related to the GME market frenzy. Individuals post threads on the subreddit and other members of the network can post comments to the thread. Then others (including the original thread poster) can comment on the comments as well. The central point of each subreddit are the threads given they are required to start a conversation. We collect the threads from the Reddit forum `Wallstreetbets' which have either the keyword `GME' or `Gamestop' in the title. %\footnote{We use the package \textcolor{red}{Python package} and include GME, gme, Gamestop, gamestop}. 
+%In a second step we download the comments from the identified threads. Since Keith Gill started his Youtube channel in summer 2020 and the market frenzy took place in January 2021, we collect one year of data from Wallstreetbets which span the frenzy. Since we model users posting behaviour over time, users which deleted their accounts cannot be analysed as they appear on Reddit as `anonymous'. We collected 116,231 threads and 3,715,053 comments from 502,668 users over the time period 01.06.2020 until 31.05.2021. We visualize the relationship between the daily GME return and the daily log number of posts about GME on Wallstreetbets in Figure \ref{fig:gme_price}. We see that activity started to slowly increase in September 2020 and reach a peak at the end of January 2021, which coincides with the spikes in return in both directions for GME.
+%A total of 25,541 users deleted their account from Reddit which resulted in their username being displayed as `anonymous'. Provided we intend to analyse the individual users behaviour over time, the threads related to deleted accounts are not usable. \textcolor{red}{WHEN THREADS APPEARED? RELATION TO BOTS?} Omitting the threads from unknown users, we have 502,668 users who posted 116,231 threads with an overall number of 3,715,053 comments over the time period 01.06.2020 until 31.05.2021.  
+
+\subsubsection*{Post Identification}
+The first step of the data collection process is `Post Identification'. This step results in a list of posts that fall within the search criteria. To obtain this list, one first needs to select the subreddit of interest, the keywords to search for, and the time period to include. We collected GME-related data from the subreddit WallStreetBets from 01 June 2020 to 31 May 2021. We include all posts with the keywords `GME’ and/or `GameStop’ in their title. Note that we also lowercase every character in the collected titles and compare them to ensure capitalization does not influence the results. We use the Python Pushshift.io API Wrapper (PSAW) \cite{PSAW} \hyperlink{Python Pushshift.io API Wrapper (PSAW)}{https://psaw.readthedocs.io/en/latest/} to obtain the post titles and ids.  This wrapper takes in a period, one keyword, and the subreddit of interest and returns a list of post id's. We repeat this procedure for each keyword and obtain multiple lists with post id's (one for each keyword). %To ensure that the used wrappers work correctly, we have used PSAW to obtain post id's for the GME stock at two different time points, 3 months apart. We got the same results list with one post extra identified in the later validation. 
+Then we use Python Reddit API Wrapper (PRAW) to extract the titles associated with each posts id. Finally, we need to clean and filter the obtained lists. This entails deleting duplicate posts, which may happen when there are multiple keywords in the title. %and deleting those identified posts that have the keyword only in the main text (and not in the title).
+
+\subsubsection*{Comment Extraction}
+The second step of the data collection process is `Comment Extraction'. We use the Python Reddit API Wrapper (PRAW) \hyperlink{PRAW}{https://praw.readthedocs.io/en/stable/index.html} for extracting the comment tree post-by-post. Note that for the GME dataset, extracting the comment tree for eight posts gave us an HTTP413 response exception. %which reads `too large'. 
+For these eight posts we have therefore not included the comment trees in the final dataset. The result of this step is our datasets which requires cleaning and data wrangling.
+
+\subsubsection*{Data Wrangling}
+The final step is to perform data wrangling on the obtained list of posts and comments. The following actions are taken:
+\begin{itemize}
+	\item Matching of comments to parent comment author: for each comment, we identify the author of the parent comment and use this user id as the `to’ variable. 
+	\item For the posts, we set the `to’ variable equal to the author’s id and the comment id equal to the post id.
+	\item We define a unified user dictionary: each user name is recorded. 
+	\item Filter on the time period to only include posts and comments in the selected period. Especially the comments collected can exceed these dates if the comment was posted after the original post. 
+	\item Set the timezone to UTC. 
+\end{itemize}
+
+\subsection{Final dataset description}
+%The above framework results is our final datasets which is available \footnote{on github?}. We provide a CSV file for the network data from the subreddit WSB with all user interactions (gme\textunderscore interactions.csv) and a post dictionary (post\textunderscore dictionary.csv). \footnote{the correct files are in the folder "data\textunderscore to\textunderscore share"}
+%
+Table \ref{tab:varsummary} outlines the variables in the interaction files. Each row indicates an interaction in the network, $from$ and $to$ indicate users on Reddit (vertices in the network). $post.id$, $comment.id$, and $parent.id$ determine the user behaviors and interactions, in other words, dyads among nodes. These variables can describe the comment tree for a post on Reddit according to the following rules:
+\begin{enumerate}
+	\item When $from=to$ and $post.id=parent.id=comment.id$, the user $from$ published a post on Reddit. 
+	\item When $from=to$ and $post.id=parent.id \neq comment.id$, the user $from$ comments to a post published by itself. 
+	\item When $from=to$ and $post.id \neq parent.id \neq comment.id$, the user $from$ published a sub-comment to its comment in a post. 
+	\item When $from\neq to$ and $post.id = parent.id \neq comment.id $, the user $from$ comments to user $to$'s post. 
+	\item When $from\neq to$ and $post.id \neq parent.id \neq comment.id$, user $from$ published a sub-comment to user $to$'s comment in a post. 
+\end{enumerate}
+
+%In our data file, the user name `None/NA' is abnormal, indicating a group of users who have deactivated or deleted their accounts or were shadow banned by Reddit. %There are $776,831$ posts and comments (16\%) in GME related to `None' accounts. 
+%\ref{tab:usersummary} presents the summary statistics. The range of user activities is from 1 to thousands, and the standard deviations also show that users have quite varying activity levels. Most users have only 1 or a few posting activities.
+
+%A small group of users occupy a central position in the Reddit network \cite{lucchini2022reddit}, and their activities can affect other users. Such as the user `u/OPINION{\_}IS{\_}UNPOPULAR', who has moderated the WSB subreddit for over 9 years \cite{wallstreetbets}. Other users have played important roles in the GME short squeeze, such as `u/DeepFuckingValue', who had published a series of posts on WSB and sparked many users' interest in the GME stock \cite{deep}. `u/Stonksflyingup' shared a video on 27 October 2020 explaining how a short position held by Melvin Capital could trigger a short squeeze \cite{lucchini2022reddit}. These users are potential influencers\cite{gianstefani2022echo} and are worth to be explored further in the future. 
+
+%%%%% variables
+\begin{table}[h]
+	\caption{Explanation of variables in interaction data files.}
+	\label{tab:varsummary}
+	\centering
+	\begin{tabular}[h]{ll}
+		\hline \hline 
+		Variable & Description \\[0.1ex]
+		\hline \hline
+		from & A unique username for a Reddit user who publishes a comment or a post.\\
+		to & A unique username for a Reddit user who receives a comment or publishes a post.\\
+		time & The publishing time of comments and posts from user from.\\
+		utc & UNIX time stamp.\\
+		post.id & A string of characters with numbers and letters, unique for each post.\\
+		comment.id & A string of characters with numbers and letters, unique for a comment. \\
+		parent.id & A string of characters with numbers and letters, unique for a comment or a post \\
+		&that the comment is replying to.\\
+		subreddit & The subreddit for corresponding activities (wallstreetbets).\\
+		\hline \hline
+	\end{tabular}
+\end{table}
+
+%\begin{table}[h]
+%	\caption{Degree (number of activities) for users in the data}
+%	\label{tab:usersummary}
+%	\begin{tabular}{ccccccccc} 
+%		\hline\hline 
+%		&\multicolumn{5}{c}{Percentile} \\
+%		Min & $10^{th}$ &$25^{th}$ &$50^{th}$ & $75^{th}$&$90^{th}$ &Maximum & Mean & St.dev \\
+%		\hline
+%		1 &1&1&2&7&22&955,971&15.9&1322.2 \\
+%		\hline\hline
+%	\end{tabular}
+%\end{table}
+
+
+

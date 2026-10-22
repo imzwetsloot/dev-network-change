@@ -1,0 +1,80 @@
+%For a detailed look of the microstructure of the network around the frenzy (11 Jan 2021 until 13 Feb 2021) we use networks constructed each 5 minutes. 
+Naturally the period of the market frenzy is of high interest. Due to the speed at which things changed during that time, we analyse it at a 5-minute frequency. Similarly to the hourly setting, we apply the models (2) and (3) and combine the models with the change point detection method described in section 4.2. We perform the change point selection under the settings window size: $h =2016$ 5-minute intervals (1 week), stepsize: $l = 288$ 5-minute intervals (1 day), and time between change points: $k=288$ (1 day). We analyse the network around the frenzy (11 Jan 2021 until 13 Feb 2021).
+
+We first look at the identified change points in our models. Table \ref{tab:changepoints_5min} displays the results, and we see that most VNs, 59.4\%, do not change their behaviour in the period around the frenzy but that many of the ANVNs, 86.4\%, do show a change in posting behaviour. Figure \ref{fig:cp_over_time_5min} shows the change points of all VNs (left) and all ANVNs (right) versus time. We see that the VN change points are spread out over the month of January whereas most ANVNs change their behaviour towards the end of it. 
+
+\begin{table} 
+	\caption{Identified change points}
+	\label{tab:changepoints_5min}
+	\centering
+	\begin{tabular}[t]{lrrrr}
+		\hline \hline
+		No. cps&VN&\% & ANVN &\%\\
+		\hline \hline
+		0&38&59.4&2895&13.5\\
+		1&26&40.6&18566&86.4\\
+		2&0&0.0&16&0.1\\
+		3&0&0.0&1&0.0\\
+		$\geq 4$&0&0.0&0&0.0\\
+		\hline \hline
+	\end{tabular}
+\end{table}
+
+\begin{figure}
+	\caption{Changepoints over time for the VNs (left) and the ANVNs (right).}
+	\label{fig:cp_over_time_5min}
+	\centering
+	\includegraphics[scale = 0.3]{data_5min/cps_over_time_VN.png}
+	\includegraphics[scale = 0.3]{data_5min/cps_over_time_NVN.png}
+\end{figure}
+
+Next, we are going to analyse the parameters of the models. As discussed in section 4.2.1 we use LASSO to ensure interpretability of the models we estimate. For the VNs only two vital nodes have non-zero parameters in the estimated models (excluding a non-zero constant), the first VN is 4300 (Keith Gill) and the other is VN 24233. The parameters of VN 4300 are summarized in Table \ref{tab:par_VN4300_5min}. We see that past own activity reduces likelihood of posting in addition to when Wallstreet is open and at hour 21 (just after closing of Wallstreet in UTC time) the likelihood of posting is increased. All other parameters are rather close to zero.
+
+\begin{table} 
+	\caption{Parameters for VN 4300 in 5 minute model}
+	\label{tab:par_VN4300_5min}
+	\centering
+	\begin{tabular}[t]{llr}
+		\hline \hline
+		Variable   &     Lag & Parameter estimate\\
+		\hline
+		a0& &-46.9\\
+		\hline
+		$x_{ii}$&1& -36.8\\
+		$x_{ii}$&2 &-54.0\\
+		$x_{ii}$&3 &-51.7\\
+		$x_{ii}$&4 &-46.0\\
+		$x_{ii}$&5 &-29.5\\
+		\hline
+		$D^{in}_i$&1 &  1.9\\
+		$D^{in}_i$&2&  3.6\\
+		$D^{in}_i$&4 & -2.6\\
+		$D^{in}_i$&5& -3.5\\
+		\hline
+		$AC^{vn}_1$&1 &  1.4\\
+		$AC^{vn}_1$&3 &  0.2\\
+		$AC^{vn}_1$&5  &-0.8\\
+		\hline
+		$AC$&1  &-0.5\\
+		$AC$&5  &  0.9\\
+		\hline
+		$AC^{24}$&1 & -0.002\\
+		$AC^{24}$&2 & -0.6\\
+		$AC^{24}$&3 &  0.5\\
+		\hline
+		$Dum_{wls}$ && 18.0\\
+		hr21 && 23.7\\
+		\hline \hline
+	\end{tabular}
+\end{table}
+
+Figure \ref{fig:par_ANVN_5min} shows the parameter estimates for the ANVN models and the pattern is very similar to the hourly model (recall Figure 5, right Figure). The only large difference is that the parameters estimated for the overall activity ($AC$) are more dispersed, this is unexpected as the overall activity level in the frenzy period is also much higher and varies more compared to the period before the frenzy (refer to Figure 1). For the impact of the change in behaviour on the markets during the frenzy, see Appendix \ref{app:5minfin}. 
+
+\begin{figure}
+\caption{Parameter Estimates 5-minute model for ANVN}
+\label{fig:par_ANVN_5min}
+\centering
+\includegraphics[scale = 0.3]{data_5min/fig_nvn_parameters.png}
+\end{figure}
+
+

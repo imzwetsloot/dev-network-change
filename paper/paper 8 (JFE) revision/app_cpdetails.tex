@@ -1,0 +1,55 @@
+%appendix change point detection details
+We specify a change point detection framework, to link individual change behaviour to the stock market behavior. 
+The method is based upon a greedy algorithm for searching for multiple change points in time series data, cf. \citet{bai2023multiple}. Our implementation of this general framework is visualized in Figure 3. The algorithm we propose consists of three steps (A-C), is entirely data driven, and is implemented as an exhaustive search algorithm:
+\begin{enumerate}[label=Step \Alph*:]
+	\item Identify change point candidates by conducting a rolling window search and identifying a single (possible) change point in each window.
+	\item Obtain all possible change point sequences by constructing a set of unique change points and building the powerset.
+	\item Select the best change point sequence by estimating a model for each combination of change points and selecting the best model and related change point sequence.
+\end{enumerate} 
+Next, we discuss each step in detail.
+
+\subsubsection*{Step A: Identify change point candidates} 
+In Step A, we conduct a rolling window search over windows of length $h$. Between the starting points of 2 windows, we define a step size $l \geq 1$. For a given dataset of length $T$, there are $G$ windows of length $h$ with step size $l$. %(Figure \ref{fig:cp_search.jpg} shows four such windows). 
+For $g \in \{1, ..., G\}$, define  $T_{1,g}$, $T_{2,g}$ as the start and endpoint of window $g$ respectively. Next, we wish to derive the most likely change point within each window $g$. We define the set of possible change points in window $G$ as $T_G$, spanning every datapoint in the inner $50\%$ quantile range. By this, it is ensured sufficient data before and after each change point exist for model estimation. For each possible change point $\tau$ in window $g$ we estimate equation (2) or (3) by minimizing the function $L()$ which is the difference between realised and predicted values:
+
+\begin{align}
+	L(T_{1,g},\tau) &= \frac{1}{\tau-T_{1,g} + 1}\underset{A}{\arg \min} \sum_{t = T_{1,g}}^{\tau}  (y_t - I(\text{logit}(AX_t)>0.5)) \\
+	L(\tau+1,  T_{2,g}) &= \frac{1}{T_{2,g} - \tau}\underset{A}{\arg \min} \sum_{t = \tau+1}^{T_{2,g}}  (y_t - I(\text{logit}(AX_t)>0.5)),	
+\end{align}
+where $L(a,b)$ is related to the model loss based on the data from timepoint $a$ to $b$. 
+%\begin{align}
+%\hat{\Theta}_{1,g} &= \underset{\Theta_{1,g}}{\arg \min} \frac{1}{\tau - 1} \sum_{t = T_{1,g}}^{\tau - 1}  Loss(\Theta_{1,g}) \\
+%\hat{\Theta}_{2,g} &= \underset{\Theta_{2,g}}{\arg \min} \frac{1}{T_{2,g} - \tau} \sum_{t = \tau}^{T_{2,g}}  Loss(\Theta_{2,g})
+%\end{align}
+Then, the final change point candidate in window $g$ is the minimizer of
+\begin{align*}
+	\hat{\tau}_g = \underset{\tau}{\arg \min } \; L(T_{1,g},\tau) + L(\tau+1,  T_{2,g}).
+\end{align*}
+
+%\begin{align*}
+%\hat{\tau} = \underset{\tau}{\arg \min} \frac{1}{T_g} \sum_{t = T_{1,g}}^{\tau - 1} Loss(\Theta_{1,g}) + \sum_{t = \tau}^{T_{2,g}} Loss(\Theta_{2,g})
+%\end{align*}
+\subsubsection*{Step B: Identify possible change point sequences} 
+We derive the change point candidates for all windows $G$, which provides us with a set of $\{\hat{\tau}_g\}_1^{G}$. Define the set $S_{\tau}$ as the set with all unique elements in $\{\hat{\tau}_g\}_1^{G}$. Next, we obtain $P(S_{\tau})$, the power set of $S_{\tau}$ containing all subsets of $S_{\tau}$, including the empty set and $S_{\tau}$ itself.% In Figure \ref{fig:cp_search.jpg}, $S_{\tau}$ consists of 3 elements and $P(S_{\tau})$ consists of 8 elements.
+
+\subsubsection*{Step C: Select the best change point sequence} 
+Take an element $CPs \in P(S_{\tau})$, where $CPs$ is a sequence of change points: i.e. $CPs = \{cp_1,\dots,cp_R\}$, where $R=|CPs|$ is the number of change points, a non-negative integer. Note that $CPs$ cuts the total dataset into $R+1$ consecutive windows. We denote by $T_{1,cp_r}$ and $T_{2,cp_r}$ the start and endpoint of window $r$ with $r \in \{1,\dots R\}$. %Note that by definition, $T_{1,r+1}=T_{2,r}+1$ as the windows are consecutive and $T_{1,1}=1, \; T_{2,R+1}=T$. 
+We estimate the model for the full dataset of length $T$ with change point set $CPs$ and compute $L(CPs)$, which is obtained as
+\begin{align}
+	\label{eq:select_cps}
+	%\tiny
+	L(CPs) = \sum_{r = 1}^{R} L(T_{1,r},T_{2,r}) + \omega n_{CPs}, 
+\end{align}
+as in \textcite{bai2023multiple}. 
+To control for the likelihood improvement when additional change points are included, we incorporate $\omega n_{CPs}$ where $\omega$ is the penalty parameter and $n_{CPs}$ is the number of non-zero parameters estimated in the $R+1$ models (i.e. the number of non-zero elements in $\Theta_s$ in model (4), summed up over the $R+1$ windows). As we are interested in a model with good forecasting accuracy, we choose to work with the AIC criterion, hence $\omega = 2$ \citep{Akaike1974}. We repeat this procedure for each element of $CPs$ in $P(S_{\tau})$. Note that for the empty element of $CPs$, i.e. no change points in the model, equation \eqref{eq:select_cps} simplifies to $L(CPs=\emptyset) = L(1,T) + \omega n_{CPs} $. The final change point set for this model is the minimizer of
+\begin{align} \label{eq:CPShat}
+	\widehat{CPs} = \underset{CPs \in P(S_{\tau})}{\arg \min }\; (-2\;L(CPs)). 
+\end{align}
+This results in a sequence of change points $\widehat{CPs}$ that minimizes the penalized loss over the whole dataset. These change points determine the time points the communication behaviour between the nodes $i$ and $j$ changed. %and this solves the third challenge. 
+
+To ensure that the final change point sequence is not only outperforming in terms of likelihood but also does so with statistical significance, we perform the Vuong test for overlapping models \citep{Vuong1989} on a $5\%$ level, which is akin to a likelihood ratio test. We test the models which minimize (\ref{eq:CPShat}) against a model without any change points. We perform the Vuong test for overlapping models as the models potentially overlap. The test statistic is compared against critical values from the sum of weighted chi-squared random variables, which differentiates the test from the classical likelihood ratio test. As a result, we only consider series of changes in communication behaviour (change points series) which are statistically significantly better on a $5\%$ level compared to the model with no changes in behaviour. 
+
+\subsection*{Model selection and interpretability}
+\label{sec:modelsel}
+We use sparse modelling methods \citep{Barigozzi2019, Trimborn2022a, Trimborn2022, Zhang2023} to identify the relevant determinants of communication between two nodes in a data-driven manner. 
+The models as defined above include many parameters. For example, assume we identified $R$ change point candidates, than we have $R+1$ submodels. Each submodel has either 32 or 34 features as listed in Table 3 and these features are included for $K$ lags. This results in a model with hundreds of parameters, challenging the interpretability of the parameters. To tackle this issue, we perform LASSO regularization \citep{tibshirani_regression_1996}, which is an often applied technique in network analysis \citep{Barigozzi2019, Trimborn2022a, Trimborn2022, Zhang2023}. LASSO enables us to detect which parameters are relevant for the users posting behaviour. After we identified the relevant parameters, we estimate the equations (2) and (3) with the change points $\widehat{CPs}$ as estimated in Eq \eqref{eq:CPShat} again but only including the parameters selected in the previous step. This step follows the finding of \textcite{Belloni2013} that a reestimation of the model removes the bias introduced by the LASSO estimation procedure. %This solve the fourth challenge.
