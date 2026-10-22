@@ -19,11 +19,10 @@ Aggregation = "hour" ; Aggregationmin=60; folder="data_hour"
 #Aggregation = "5minute";Aggregationmin=5; folder= "data_5min"
 
 #set working directory
-setwd("F:/Reddit_project/Github")
-#setwd("C:/Users/inez_/Documents/2 Research/1 Papers/44. Network change - Simon/Github")
+setwd("C:/Users/izwetsl/OneDrive - UvA/Documenten/2 Research/1 Papers/44. Network change - Simon/dev_network_change/dev-network-change")
 
 #number of cores
-processes = 10
+processes = 1
 
 # Parallelization initializeres
 if (processes > 1) {
@@ -71,6 +70,6 @@ if (processes > 1) {
 }
 
 results <- rbindlist(list.results)
-results <- results[order(-results$n.ones), ]
+results <- results[order(results$n.ones), ]
 
-write.csv(results, file = paste0("data/",folder,"/count_communications_inputmatrix.csv"), row.names = FALSE)
+write.csv(results, file = paste0("analysis/",folder,"/count_communications_inputmatrix.csv"), row.names = FALSE)
