@@ -41,7 +41,8 @@ Thank you for going once more through our manuscript. We were glad to read that 
 \textit{Contribution relative to the econometric literature.} The paper proposes a new econometric framework (ISBM), but the novelty of the methodological contribution relative to existing approaches could be articulated more clearly. The framework combines several components—logistic regression models for link prediction in networks, change-point detection methods, and autoregressive models linking network variables to financial outcomes. It would therefore be helpful if the authors clarified more explicitly what the main methodological contribution of the ISBM framework is, how it diﬀers from existing dynamic network models, and whether the proposed change-point procedure introduces any new econometric challenges. More generally, given the journal’s focus, the paper could benefit from a more rigorous and compact presentation of the econometric methodology, ideally in a more general form that could be adapted to diﬀerent empirical applications beyond the specific setting studied in the paper. 
 }
 
-\ourresponse{A
+\ourresponse{We thank the reviewer for this comment. The main methodological contribution of ISMB is that it estimates a separate link model with change points for every node pair, and aggregates the detected change points into market-level variables. Existing dynamic network models typically estimate parameters that are common to all nodes or describe aggregate network statistics. The change-point procedure raises three econometric challenges: the combinatorial search over candidate change point sequences (Steps A--C), the choice between overlapping models via the Vuong test, and LASSO estimation within each regime. In the revision, we present the framework in a compact and general form in Section~\textcolor{red}{4}, so that it can be applied to other network settings.
+\textcolor{red}{TO DO: name the dynamic network models we compare to; write the general formulation.}
 }
 
 \bigskip
@@ -54,6 +55,8 @@ Thank you for going once more through our manuscript. We were glad to read that 
 }
 
 \ourresponse{
+We thank the reviewer for this suggestion. We re-estimated the market models with the change points of Keith Gill, of the moderators and of the remaining VNs (and their followers) as separate variables. Keith Gill's own change points contribute little, but those of his followers do; the remaining VNs and their followers drive most of the results. \textcolor{red}{TO DO: insert tables and section number.}
+
 \textcolor{red}{Inez computed the CPs. Simon ran the finance analysis for the onlyKG, onlyMod, rest. Results are as expected. Keith hardly contributes, but his followers do. The rest influencers drive the results and their followers contribute still quite some, but of course not as much as keith followers}
 }
 
@@ -67,7 +70,8 @@ Thank you for going once more through our manuscript. We were glad to read that 
 }
 
 \ourresponse{
-	A
+	We thank the reviewer for raising this point. Our new analysis of the parameter changes at the change points (see also our response to Reviewer 2, Major Comment 5) sheds light on the mechanism. After a change point, followers' communication depends more on the activity of the VNs and on trading hours, while the changes of the VNs show no common direction. This is consistent with information diffusing from influencers to followers over time, rather than with both groups acting on the same information at the same time. We added this discussion to Section~\textcolor{red}{X}.
+	\textcolor{red}{TO DO: decide whether to test the spillover formally (e.g. lagged effect of VN change points on follower change points).}
 }
 
 \bigskip
@@ -80,7 +84,8 @@ Thank you for going once more through our manuscript. We were glad to read that 
 }
 
 \ourresponse{
-	A
+	We thank the reviewer for this comment. (i) Sparsity enters the method in two places: the LASSO penalty on the parameters, and the requirement that a follower communicates with a VN in at least four time periods before we estimate a model for that pair. In the revision, we report how many models must be estimated when this minimum is raised to 5, 10 and 15 communications, and how the results change. (ii) We now state the objective function explicitly. For each regime $s$, the parameters are estimated by minimising $-\ell(\Theta_s) + \lambda_s \|\Theta_s\|_1$, where $\ell$ is the logistic log-likelihood and $\lambda_s$ is selected by time-series cross-validation. We also add a discussion of the computational complexity, i.e.\ the number of models estimated (node pairs $\times$ windows $\times$ candidate change point sequences) and the run time.
+	\textcolor{red}{TO DO: run the sparsity table on all files (analysis/robustness/sparsity\_levels\_table.R) and decide which thresholds to estimate; check the objective function against the code; add run times.}
 }
 
 \bigskip
@@ -98,7 +103,8 @@ Thank you for going once more through our manuscript. We were glad to read that 
 }
 
 \ourresponse{
-	A
+	We thank the reviewer and clarified all three points in Section~3. (1) The intraday GME price data are obtained from \textcolor{red}{AlphaVantage / DataStream}. (2) The communication variable $x_{ij,t}$ is binary, so multiple comments from user $i$ to user $j$ within the same hour are recorded as a single communication. (3) A comment by user $i$ on a post or comment of user $j$ is encoded as a directed link from $i$ to $j$; a post, or a comment by a user on their own post or comment, is recorded as a self-communication $x_{ii,t}$.
+	\textcolor{red}{TO DO: confirm the data source; check that (2) matches the code.}
 }
 
 \bigskip\bigskip
