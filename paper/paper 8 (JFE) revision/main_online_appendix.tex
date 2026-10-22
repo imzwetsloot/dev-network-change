@@ -1,0 +1,114 @@
+\documentclass[11pt,a4paper,rorate,times]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage[affil-it]{authblk} %for affil
+%\usepackage{natbib}
+%\bibliographystyle{abbrvnat}
+
+\usepackage{amsfonts}
+\usepackage{bbm}
+%\usepackage{natbib}
+\usepackage{rotating}
+\usepackage{hyperref}
+\usepackage{epstopdf}
+\usepackage[english]{babel}
+\usepackage{latexsym}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{supertabular}
+\usepackage{setspace}
+\usepackage{xspace}
+\usepackage{url}
+\usepackage{color}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{subcaption}
+\usepackage{authblk}
+\usepackage{lscape}
+\usepackage{float}
+\usepackage{enumitem}
+\floatstyle{plaintop}
+\restylefloat{table}
+
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+\usepackage{multirow}
+
+\usepackage[backend = biber, style=authoryear,ibidtracker=context,bibencoding=utf8,hyperref=false,doi=false,url=false, maxcitenames=2, maxbibnames=50, isbn = false, firstinits = true, uniquename=false, uniquelist=false,dashed=false,natbib=true,date=year]{biblatex}
+
+\addbibresource{references.bib}
+
+\newcommand{\hl}[1]{{\color{red}#1}}
+
+\renewcommand{\baselinestretch}{1.2}
+\setlength{\textwidth}{15.5cm} \setlength{\textheight}{21cm}
+\topskip0.0cm \topmargin0.0cm \oddsidemargin=0.25in
+\evensidemargin=0.25in \setlength{\parskip}{3mm}
+
+\setlength{\oddsidemargin}{0.1in}   % set left margin 1 and 1/2 inch
+\setlength{\evensidemargin}{0.1in}  % set right margin 1 inch
+\setlength{\topmargin} {0in}        %{0.25in}
+% set top margin = 1 inch
+\setlength{\headsep}{0in}           % together with is command
+\setlength{\headheight}{0in}        % set the header high to standard
+\setlength{\textwidth}{6in}         % set text width = 6 inch
+\setlength{\textheight}{9in}        % set text length = 9 inch
+\setlength{\unitlength}{0.1in}      % set the unit length in picture
+
+\newtheorem{definition}{Definition}
+\graphicspath{ {../../results/} }
+
+\title{	Online Appendix of \\ Reddit users unleashed - understanding user behaviour and their impact on meme stocks }
+\author[1,2]{Simon Trimborn\thanks{Corresponding author}}
+\author[3]{Inez Maria Zwetsloot}
+\affil[1]{Amsterdam School of Economics, University of Amsterdam, Amsterdam}
+\affil[2]{Tinbergen Institute, Amsterdam}
+%\affil[3]{Department of Management Sciences, City University of Hong Kong, Hong Kong}
+\affil[3]{University of Amsterdam Business School, University of Amsterdam, Amsterdam}
+%\affil[3]{Department of Finance, City University of Hong Kong, Hong Kong}
+%\affil[4]{School of Data Science, City University of Hong Kong, Hong Kong}
+\date{\today}
+
+
+\begin{document}
+\maketitle
+
+\section*{Online Appendix}
+\appendix
+\numberwithin{equation}{section}
+\numberwithin{figure}{section}
+\numberwithin{table}{section}
+\section{Robustness analysis: Vital Node definition}
+\label{app:vnrobust}
+\input{app_vnrobust}
+
+\section{Change point detection details}
+\label{app:cpdetails}
+\input{app_cpdetails}
+
+\section{Speeding up computational time}
+\label{app:computation}
+\input{app_computation}
+
+\section{Robustness analysis: 5-minute-by-5-minute model}
+\label{app:5minby5min}
+\input{app_5minby5min}
+
+\section{WSB impact during the market frenzy: 5-minute-by-5-minute model}
+\label{app:5minfin}
+\input{app_5minfin}
+
+\section{Robustness analysis: Modelling by trading hour}
+\label{app:app_modelbyhour}
+\input{app_modelbyhour}
+
+\printbibliography
+
+
+
+\newpage
+
+
+\end{document}
+

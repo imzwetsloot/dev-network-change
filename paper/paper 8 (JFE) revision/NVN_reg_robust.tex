@@ -1,0 +1,100 @@
+
+% Table created by stargazer v.5.2.3 by Marek Hlavac, Social Policy Institute. E-mail: marek.hlavac at gmail.com
+% Date and time: Mon, Oct 19, 2026 - 17:03:18
+\begin{table}[!htbp] \centering 
+  \caption{Regression to determine if the returns lead to the changepoints. We regress 
+onto the NVN variables their past 7 lagged variables, past 7 AC variables, events associated with the WSB frenzy as count variable, and 
+the past 7 returns. To determine if the relationship is different during the build-up to the frenzy, the frenzy period, and its aftermath, we 
+take the splits used for the 5 minute analysis as start and end of the frenzy period. Left are the observations used before 2021-01-11, middle between 2021-01-11 and 2021-02-13, and after 
+2021-02-14. We observe that the returns over 7 lags do not significantly impact the change point variables, 
+hence the cause for the changepoints occurrence originates in the network.} 
+  \label{NVN_reg_robust} 
+\scriptsize 
+\begin{tabular}{@{\extracolsep{5pt}}lccc} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & \multicolumn{3}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-4} 
+\\[-1.8ex] & \multicolumn{3}{c}{NVN} \\ 
+\\[-1.8ex] & (1) & (2) & (3)\\ 
+\hline \\[-1.8ex] 
+ NVN1 & 0.193$^{***}$ & 0.621$^{***}$ & 0.688$^{***}$ \\ 
+  & (0.039) & (0.101) & (0.042) \\ 
+  & & & \\ 
+ NVN2 & 0.013 & $-$0.029 & 0.160$^{***}$ \\ 
+  & (0.039) & (0.105) & (0.047) \\ 
+  & & & \\ 
+ NVN3 & 0.104$^{***}$ & 0.095 & 0.008 \\ 
+  & (0.038) & (0.075) & (0.036) \\ 
+  & & & \\ 
+ NVN4 & 0.006 & $-$0.024 & $-$0.085$^{**}$ \\ 
+  & (0.035) & (0.077) & (0.033) \\ 
+  & & & \\ 
+ NVN5 & $-$0.108$^{***}$ & $-$0.072 & 0.006 \\ 
+  & (0.029) & (0.071) & (0.032) \\ 
+  & & & \\ 
+ NVN6 & $-$0.009 & 0.141$^{**}$ & 0.086$^{***}$ \\ 
+  & (0.026) & (0.067) & (0.030) \\ 
+  & & & \\ 
+ NVN7 & 0.024 & $-$0.049 & 0.011 \\ 
+  & (0.025) & (0.060) & (0.028) \\ 
+  & & & \\ 
+ AC & $-$0.024 & 0.085 & 0.063 \\ 
+  & (0.016) & (0.138) & (0.050) \\ 
+  & & & \\ 
+ AC1 & 0.029 & $-$0.127 & $-$0.074 \\ 
+  & (0.019) & (0.153) & (0.067) \\ 
+  & & & \\ 
+ AC2 & 0.004 & $-$0.077 & 0.059 \\ 
+  & (0.020) & (0.169) & (0.071) \\ 
+  & & & \\ 
+ AC3 & 0.006 & 0.328 & $-$0.065 \\ 
+  & (0.021) & (0.286) & (0.073) \\ 
+  & & & \\ 
+ AC4 & 0.013 & $-$0.194 & 0.001 \\ 
+  & (0.021) & (0.245) & (0.071) \\ 
+  & & & \\ 
+ AC5 & $-$0.020 & 0.174 & 0.00005 \\ 
+  & (0.019) & (0.207) & (0.069) \\ 
+  & & & \\ 
+ AC6 & $-$0.003 & $-$0.238 & $-$0.035 \\ 
+  & (0.017) & (0.213) & (0.068) \\ 
+  & & & \\ 
+ AC7 & 0.031$^{**}$ & 0.126 & 0.159$^{***}$ \\ 
+  & (0.013) & (0.157) & (0.048) \\ 
+  & & & \\ 
+ ret1 & 1.781$^{*}$ & 0.805 & $-$0.038 \\ 
+  & (1.009) & (1.831) & (1.548) \\ 
+  & & & \\ 
+ ret2 & 0.900 & $-$1.988 & $-$2.084 \\ 
+  & (1.026) & (1.729) & (1.540) \\ 
+  & & & \\ 
+ ret3 & 0.903 & 0.870 & 1.574 \\ 
+  & (1.020) & (1.704) & (1.539) \\ 
+  & & & \\ 
+ ret4 & 1.187 & 1.334 & 0.882 \\ 
+  & (1.019) & (1.695) & (1.550) \\ 
+  & & & \\ 
+ ret5 & $-$1.186 & $-$1.313 & 0.854 \\ 
+  & (1.015) & (1.768) & (1.530) \\ 
+  & & & \\ 
+ ret6 & 0.563 & 2.611 & 0.799 \\ 
+  & (1.007) & (1.805) & (1.498) \\ 
+  & & & \\ 
+ ret7 & $-$1.300 & 1.206 & $-$0.662 \\ 
+  & (1.006) & (1.690) & (1.500) \\ 
+  & & & \\ 
+ event & 0.034$^{**}$ & $-$0.001 & 0.053 \\ 
+  & (0.016) & (0.164) & (0.066) \\ 
+  & & & \\ 
+ Constant & $-$0.045$^{***}$ & $-$0.162 & $-$0.483$^{***}$ \\ 
+  & (0.010) & (0.359) & (0.118) \\ 
+  & & & \\ 
+\hline \\[-1.8ex] 
+Observations & 975 & 160 & 505 \\ 
+R$^{2}$ & 0.167 & 0.445 & 0.935 \\ 
+\hline 
+\hline \\[-1.8ex] 
+\textit{Note:}  & \multicolumn{3}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
+\end{tabular} 
+\end{table} 

@@ -1,0 +1,110 @@
+\documentclass[11pt,a4paper,rorate,times]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage[affil-it]{authblk} %for affil
+%\usepackage{natbib}
+%\bibliographystyle{abbrvnat}
+
+\usepackage{amsfonts}
+\usepackage{bbm}
+%\usepackage{natbib}
+\usepackage{rotating}
+\usepackage{hyperref}
+\usepackage{epstopdf}
+\usepackage[english]{babel}
+\usepackage{latexsym}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{supertabular}
+\usepackage{setspace}
+\usepackage{xspace}
+\usepackage{url}
+\usepackage{color}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{subcaption}
+\usepackage{authblk}
+\usepackage{lscape}
+\usepackage{float}
+\usepackage{enumitem}
+\floatstyle{plaintop}
+\restylefloat{table}
+
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+\usepackage{multirow}
+
+\usepackage[backend = biber, style=authoryear,ibidtracker=context,bibencoding=utf8,hyperref=false,doi=false,url=false, maxcitenames=2, maxbibnames=50, isbn = false, firstinits = true, uniquename=false, uniquelist=false,dashed=false,natbib=true,date=year]{biblatex}
+
+\addbibresource{references.bib}
+
+\newcommand{\hl}[1]{{\color{red}#1}}
+
+\renewcommand{\baselinestretch}{1.2}
+\setlength{\textwidth}{15.5cm} \setlength{\textheight}{21cm}
+\topskip0.0cm \topmargin0.0cm \oddsidemargin=0.25in
+\evensidemargin=0.25in \setlength{\parskip}{3mm}
+
+\setlength{\oddsidemargin}{0.1in}   % set left margin 1 and 1/2 inch
+\setlength{\evensidemargin}{0.1in}  % set right margin 1 inch
+\setlength{\topmargin} {0in}        %{0.25in}
+% set top margin = 1 inch
+\setlength{\headsep}{0in}           % together with is command
+\setlength{\headheight}{0in}        % set the header high to standard
+\setlength{\textwidth}{6in}         % set text width = 6 inch
+\setlength{\textheight}{9in}        % set text length = 9 inch
+\setlength{\unitlength}{0.1in}      % set the unit length in picture
+
+\newtheorem{definition}{Definition}
+\graphicspath{ {../../results/} }
+
+\title{	Reddit users unleashed - understanding user behaviour and their impact on meme stocks %\thanks{The authors are thankful for helpful discussions and comments by the seminar participants at National University of Singapore, Tilburg University, Queens Management University, University of Amsterdam, City University of Hong Kong, Stockholm Business School, SKEMA, Utrecht University and Tinbergen Institute. The audiences comments during presentation of the paper at the Spring Research Conference of ASA, Financial Econometrics meets Machine Learning Conference at Erasmus University Rotterdam and at Quantitative Finance and Financial Econometrics 2024 conference are gratefully acknowledged.}
+}
+\author[1,2]{Simon Trimborn}
+\author[3]{Inez Maria Zwetsloot \thanks{Corresponding author}}
+\affil[1]{Amsterdam School of Economics, University of Amsterdam, Amsterdam}
+\affil[2]{Tinbergen Institute, Amsterdam}
+%\affil[3]{Department of Management Sciences, City University of Hong Kong, Hong Kong}
+\affil[3]{University of Amsterdam Business School, University of Amsterdam, Amsterdam}
+%\affil[3]{Department of Finance, City University of Hong Kong, Hong Kong}
+%\affil[4]{School of Data Science, City University of Hong Kong, Hong Kong}
+\date{ }
+
+
+\begin{document}
+
+\maketitle
+\vspace{-0.75cm}
+\begin{abstract}
+
+%	Online social networks play an important role in financial markets and facilitate information sharing among investors for meme stocks, as was shown vividly in the recent Reddit hype. In the literature either a theoretical model is build to characterize the role of individual social network users on financial markets or aggregated empirical models are tested on small networks, leaving a gap for investigating this relationship empirically for large scale networks like Reddit. We study this relationship empirically with network data from WallStreetBets, a subreddit, via a model we term the Interpretable Social Network and Market Behaviour Model (ISBM); a novel model which captures heterogeneous individual user behaviour and links this through innovative change point modelling to the stock market. The model is scalable and includes both influential nodes as well as followers. We find that 1) both influential users as well as followers impact market behaviour, 2) changes in the network are observed well before the market frenzy, 3) changes in users behaviour can explain the market movements and improves the adj. $R^ 2$ from modelling the return by 630\%. Our results lead to insights and recommendations for regulators on effects of meme stocks on markets. %Our study provides new empirical evidence, associated theoretical explanations for the results, and a practical illustration of our developed model which links heterogeneous social network user behavior to meme stocks price movement.
+	
+		Online social networks play an important role in financial markets, as was shown vividly in the recent Gamestop hype on Reddit. In the literature either a theoretical model is build to characterize the role of individual social network users on financial markets or aggregated empirical models are tested on small networks, leaving a gap for investigating this relationship empirically for large scale networks. Our study analyzes WallStreetBets using the proposed Interpretable Social Network and Market Behaviour Model (ISBM), which links individual user behavior to market movements. We find that 1) both influential users as well as followers impact market behaviour, 2) changes in the network are observed well before the market frenzy, 3) changes in users behaviour can explain the market movements and improves the adj. R2 from modelling the return by 630\%. Our results lead to insights and recommendations for regulators on effects of meme stocks on market
+	
+\end{abstract}
+\noindent{\bf Keywords: }{Social Network Market Impact, Social Network Modelling, Network dynamics, Wallstreetbets, Changepoint detection, meme stocks} %High-Dimensions, 
+
+%		\vspace{0.2cm}
+%\noindent{\bf JEL classification:}{ C55, C58, G12, G14}\\[ 0.2cm]
+
+
+
+\newpage
+
+\section*{Acknowledgments} 
+We would like to thank Siyang Hao for her support in developing the code for data collection and running it to collected all the data from Reddit as described in \citet{wang2024social}. 
+
+The authors are thankful for helpful discussions and comments by the seminar participants at National University of Singapore, Tilburg University, Queens Management University, University of Amsterdam, City University of Hong Kong, Stockholm Business School, SKEMA, Utrecht University and Tinbergen Institute. The audiences comments during presentation of the paper at the Spring Research Conference of ASA, Financial Econometrics meets Machine Learning Conference at Erasmus University Rotterdam and at Quantitative Finance and Financial Econometrics 2024 conference are gratefully acknowledged.
+
+%\section*{\hl{To Do}}
+%\hl{Quick list of things that need to be done:}
+%\begin{itemize}
+%	\item Submit data in brief article
+%	\item check that we use British English, and tha twe use change point (not changepoint).
+%	\item once paper is done, we need to manually update the sectoin and equation numbers in the online appendix. 
+%	
+%\end{itemize}
+
+\end{document}
+

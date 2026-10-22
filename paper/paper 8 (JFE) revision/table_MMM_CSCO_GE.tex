@@ -1,0 +1,27 @@
+% latex table generated in R 4.5.0 by xtable 1.8-4 package
+% Tue Oct 20 17:33:48 2026
+\begin{table}[ht]
+\centering
+\caption{This table shows the adj. $R^2$ from deriving model specifications (1), (4), and (6) with the log return, IV, and JV of the three stocks 
+                    MMM, CSCO, and GE respectively, instead of GME. The baseline model, (1), contains only the lagged variable itself with 7 Lags. For JV, no model is computed as past jump volatility does not predict future jump volatility by construction. We see that adding the variables for 
+                    AC, network statistics, and change points for VN and ANVN from GME to the equations, results in almost no adj. $R^2$ improvement, even negative values frequently occur. 
+                    The increases observed for IV are minor and not comparable with the improvements we observed for GME. This shows that the effects from the change points of the VN and ANVN
+                    are specific to GME.} 
+\label{table_MMM_CSCO_GE}
+\begingroup\scriptsize
+\begin{tabular}{l|rrr|rrr|rrr}
+   \hline \hline
+ &   & MMM &   &   & CSCO &   &   & GE &   \\ 
+   & (1) & (4) & (6) & (1) & (4) & (6) & (1) & (4) & (6) \\  \hline
+  Return & 0.0013 & 0.0017 & 0.0039 & 0.0006 & -0.0057 & -0.0065 & -0.0013 & 0.0003 & -0.0019 \\ 
+  IV & 0.1324 & 0.1405 & 0.1509 & 0.2244 & 0.2399 & 0.2438 & 0.0726 & 0.086 & 0.0985 \\ 
+  JV & 0 & -0.005 & -0.004 & 0 & -0.0116 & -0.0242 & 0 & -0.0036 & 0.0077 \\ 
+    \hline Lagged variable (for JV No) & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes \\ 
+    Vital nodes & No & Yes & Yes & No & Yes & Yes & No & Yes & Yes \\ 
+    Non-vital nodes & No & Yes & Yes & No & Yes & Yes & No & Yes & Yes \\ 
+    Network activity & No & Yes & Yes & No & Yes & Yes & No & Yes & Yes \\ 
+    Network statistics & No & No & Yes & No & No & Yes & No & No & Yes \\ \hline
+\hline
+\end{tabular}
+\endgroup
+\end{table}

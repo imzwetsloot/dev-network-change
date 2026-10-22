@@ -19,7 +19,7 @@ Aggregation = "hour" ; Aggregationmin=60; folder="data_hour"
 #Aggregation = "5minute";Aggregationmin=5; folder= "data_5min"
 
 #set working directory
-setwd("C:/Users/izwetsl/OneDrive - UvA/Documenten/2 Research/1 Papers/44. Network change - Simon/dev_network_change/dev-network-change")
+setwd("C:/Users/izwetsl/OneDrive - UvA/Documenten/2 Research/1 Papers/44. Network change - Simon/network_change")
 
 #number of cores
 processes = 1
@@ -72,4 +72,4 @@ if (processes > 1) {
 results <- rbindlist(list.results)
 results <- results[order(results$n.ones), ]
 
-write.csv(results, file = paste0("analysis/",folder,"/count_communications_inputmatrix.csv"), row.names = FALSE)
+write.csv(results, file = paste0("analysis/robustness/",folder,"/count_communications_inputmatrix.csv"), row.names = FALSE)

@@ -1,0 +1,232 @@
+
+\subsection{Research context}
+%We collected and complied a data set from Reddit, a large online discussion social network site. Reddit is divided into subreddit's, which are specific online communities dedicated to a particular topic. 
+The market frenzy of the GME stock was driven by users uniting via the subreddit Wallstreetbets, ie. /r/wallstreetbets, a subreddit focused on discussions about stocks and options trading. It started with Keith Gill, who is known on Wallstreetbets via his account `DeepFuckingValue', posting about his long positions in GME calls. %In summer 2020 he also started to analyse the stock on his Youtube channel. 
+Users of WSB invested increasingly in GME via trading platforms such as Robinhood while hedge funds were betting on a falling price of GME via short positions. Many funds shorted GME while WSB investors continued to buy the stock and went long in call options, which led to a short squeeze. This situation led to a market frenzy with high daily volatility and trading volume. The David-against-Goliath hype of WSB users on Reddit led to the bankruptcy of a hedge fund, the suspension of GME trading on the popular Robinhood trading app, and an investigation by the US Congress into alleged market manipulation. %Since then, meme stocks became such a regular phenomenon that the U.S. Securities and Exchange Commission (SEC) introduced a new term for stocks being on the radar of the internet crowd: the `meme stock phenomenon' \citep{Securities2021}. 
+
+Keith Gills' posts usually show a screenshot of his portfolio and how his positions have developed, see Figure \ref{fig:keith_gill_post} for a typical post. Research covering the GME market frenzy often looked at the sentiment of users \citep{Umar2021,Yousaf2023,Li2024}, however Figure \ref{fig:keith_gill_post} illustrates how difficult semantic analysis of the most important actor in the GME market frenzy is, given there is no text. Further, the language and culture on WSB is very different from typical finance communities, which would bias the results from sentiment analysis. Therefore we revert towards network analysis, given that the analysis of the existence of communication between users is robust towards the use of language, figures, gifs, and the like. 
+
+\begin{figure}
+	\caption{A typical post by Keith Gill on WSB. Gill is the most important person of the GME frenzy and is still hyped by the meme stock community. His posts usually show his portfolio and how his positions have developed. This illustrates how difficult semantic analysis of the most important actor in the market frenzy is, whereas network analysis presents itself as a viable solution.}
+	\label{fig:keith_gill_post}
+	\centering
+	\includegraphics[scale = 0.40]{KeithGillPost2.png}
+\end{figure}
+
+\subsection{Data collection}
+%paragraph introducing posts
+Since the GME market frenzy, constantly new meme stocks emerge with the media picking up on them. However, during the build-up period towards the first meme stock market frenzy, the WSB network did not receive much attention and meme stocks were not a thing yet. That WSB affected the stock price of GME is well studied and GME received only little media attention during this period. This makes especially the build-up period to the GME market frenzy a suitable lab environment in which the relationship between users change in behaviour on the social network and the market dynamics of the meme stock can be studied. 
+
+To analyse the relationship between the activity on WSB and the GME stock price, we collected the discussions about GME on WSB. On Reddit, individuals submit a post on the subreddit and other members can submit comments to the post. Then others (including the original post submitter) can comment on the comments as well. Each subreddit is build around the posts, given that they are required to start a conversation.
+
+%collecting posts and period of data collection
+Therefore, we first collect posts that have the keywords `GME' or `Gamestop' in the title. In a second step, we download the comments from the identified posts. The posting activity about GME was low before summer 2020 and the market frenzy took place in January 2021, so we collect one year of data from WSB which span the frenzy. We collected 111,331 posts and 3,712,017 comments from 502,650 users over the time period 01.06.2020 to 31.05.2021. We visualize the relationship between the daily GME return and the daily log number of posts and comments about GME on WSB in Figure \ref{fig:gme_price}. We see that activity started to slowly increase in September 2020 and reached a peak at the end of January 2021, which coincides with the spikes in return in both directions for GME. In the Figure we highlight the period January 19th until January 31st 2021 as the main frenzy period. In addition to media reports, this provides a rationale for explaining GME market movements with WSB data. For more details on the webscraping and data collection process, the reader is referred to the accompanying Data-in-Brief, see \citet{wang2024social}.
+
+%Code for this figure: GME_price_overall_activity.R
+\begin{figure}
+	\caption{Daily GME return (left Figure), daily log number of posts about GME on Wallstreetbets (middle Figure) and scatterplot between the two variables (right Figure), the frenzy period is highlighted in grey.}
+	\label{fig:gme_price}
+	\centering
+	\includegraphics[scale = 0.35]{GME_overall_activity.png}
+\end{figure}
+
+\subsection{Network construction}
+The total number of users who post about GME on the WSB forum amounts to 502,650 which are our nodes in the network. If a user $i$ commented on another user $j$'s post (or comment) at time point $t$, this is modelled as a directed communication towards that user. Hence, 
+\begin{align*}
+	x_{ij,t} = 
+	\begin{cases}
+		1 & \text{if $i$ sends a comment to $j$ at time $t$} \\
+		0 & \text{if $i$ does not send a comment to $j$ at time $t$}
+	\end{cases}
+\end{align*}
+with $x_{ij,t}$ a binary variable indicating the directed communication between $i$ and $j$. If a user $i$ submits a post or comment on their own post or comment, then this is going to be recorded as a self-communication, 
+\begin{align*}
+	x_{ii,t} = 
+	\begin{cases}
+		1 & \text{if $i$ submits a post or a comment to their own post/comment} \\
+		0 & \text{otherwise.}
+	\end{cases}
+\end{align*}
+%Out of the total of 3,823,348 posts and comments submitted, 3.4\% (129,704) are posts and self-comments (ie $x_{ii,t}$), the others 96.6\% are comments to other users (ie $x_{ij,t}$ for $i \neq j$). Together, $X_t = (x_{ij,t})$ form the $n \times n$ adjacency matrix, with $n$ the number of nodes. We assume that $X_t$ is a binary random matrix subject to conditional probabilities of communication emergence, whereas the matrix features directed communication (ie. non-symmetric) and has the possibility of self-communication (ie. a non-zero diagonal). 
+Note that self-communications are usually excluded in many network analysis studies. However, a specific aspect of the Reddit networks are the post, hence we chose to model these as self-communications allowing us to tailor the model to the specific Reddit network structure.
+
+%\hl{DO WE READLLY NEED THIS, I THINK WE CAN DELETE THIS PARAGRAPH AND THE FIGURE} In Figure \ref{fig:data_dummy} we show an example of a Wallstreetbets conversation stream and how to transform the conversation into network data. On the left side we see that a post starts the conversation and users can comment on the post. This post has received 5 comments. As by Reddits design, a subreddit requires posts before a conversation can be started based upon the post. We assign unique identifiers to each user and setup the communication network. In this example, the user who submitted the post is denoted as node1. The post is modeled as a self-communication of node1 with itself (refer to the first row in the edgelist on the right side of Figure \ref{fig:data_dummy}). Node2 and node3 respond directly to the post, hence this is a directed communication from 2 and 3 to 1, where node 2 posts two comments in different hours. Similarly the other posts display a communication from node 1 to 2 and from node 2 to 3. 
+%\begin{figure}%
+%\caption{An example of posts and comments on Reddit and how to transform it to an adjacency matrix. Left side shows the communications between the nodes under the post of node1, the upper right shows the edge list and the lower right the adjacency matrix constructed from this communication example.}
+%\label{fig:data_dummy}
+%\centering
+%\includegraphics[width=0.8\textwidth]{data_dummy_example.png}
+%\end{figure}
+
+%Since the goal of this study is to identify drivers of posting activity and changes in the network to explain market behaviour, 
+We observe that users commonly communicate only once per hour, hence we first split the data into hour-by-hour activity. During the market frenzy the activity is higher, hence in a second analysis, we will analyse the data 5-minute-by-5-minute during the main phase of the market frenzy.
+
+
+\subsection{Vital nodes} \label{sec:vn}
+It is well established that networks have certain users who take stronger roles in the network and are central to its evolvement \citep{lu2016vital, morone2015influence,bamakan2019opinion, Yang2015}. In addition, communication can only happen \emph{after} somebody has submitted a post, giving users who write posts (rather than only comments to posts) a leading role in the network. 
+%. To understand the microstructure of the WallStreetBets network we identify vital nodes and analyze their behavior and their effect on other users behaviour. 
+We identify vital nodes in the network in a data-driven manner. Naturally, they have to be active post submitters as a post is required to start communications in subreddits. %Of the total number of nodes in the WSB network 16.9\% have submitted a post, all other nodes merrily comment on other peoples posts. By the nature of this, one cannot be an influential node if they have never created a post. 
+Table \ref{tab:threads} gives an overview of the top 10 nodes with the highest number of posts in the WSB network. Some nodes submit many posts but receive little to no response on them or did so in a very short period of time. For example, node 1075 submitted a total of 38 posts in two different weeks only and received a total of 13 comments in the posts. A high number of reactions to posts is naturally important for someone who may count as a vital node for a network. From the nodes displayed in Table \ref{tab:threads}, potential vital nodes might be 1583 and 4300, provided they are active in 14 and 30 weeks respectively and receive a huge amount of comments to their posts. The others, however, are unlikely to be influential in the network given their short window of activity and little attention received. Therefore, we set the following definition based upon activity and reactions by the network:
+
+\begin{table}
+	\caption{Top 10 nodes with highest number of posts in the network. Potentially vital nodes might be 1583 and 4300 provided they are active in 14 and 30 weeks respectively and receive a huge amount of comments to their posts, the others however are unlikely to be influential in the network given their short window of activity and little attention received.}
+	\centering
+	\begin{tabular}[t]{lllll}
+		\hline \hline
+		Node & No. posts & Median no. comments & Total no. comments & No. of weeks\\
+		\hline
+		3827 & 270 & 0 & 0 & 12\\
+		15725 & 64 & 0 & 1167 & 6\\
+		1583 & 52 & 30761 & 1811622 & 14\\
+		16382 & 47 & 28 & 4037 & 4\\
+		4300 & 45 & 653 & 137520 & 30\\
+		1075 & 38 & 0 & 13 & 2\\
+			46870 & 31 & 0 & 11 & 1\\
+			3194 & 30 & 0 & 330 & 6\\
+			13089 & 30 & 0 & 0 & 2\\
+			17261 & 29 & 0 & 1128 & 2\\
+		\hline \hline
+	\end{tabular}
+	\label{tab:threads}
+\end{table}
+
+
+\begin{definition} \label{def:infl}
+	Vital nodes are those nodes in the network that submit posts in at least 10\% of the weeks and receive the highest 10\% median comments on their posts. 
+\end{definition}
+
+Notably, the definition is relaxed in its nature as it only requires posting activity in 5 weeks. The requirement for the highest 10\% of median comments ensures that the users attract high attention relative to the rest of the users in the network. %In the Appendix, we conduct a robustness analysis for this definition. 
+Using Definition \ref{def:infl}, we identify 64 vital nodes in the network. Among them is the well known Reddit user Keith Gill with Reddit username `DeepFuckingValue'. 
+In terms of the overall network activity, these 64 vital nodes post only a small part of all posts ($0.7\%$). However, nearly half of all nodes in the network have commented in at least one of their posts ($45.7\%$) and over half of all comments is posted in a posts of a vital node ($54.4\%$).% as displayed in Figure \ref{fig:infl_part_network}. 
+
+
+%\begin{figure}
+%	\caption{Number of posts, comments and nodes that are related to the 64 identified vital nodes}
+%	\label{fig:infl_part_network}
+%	\centering
+%	\includegraphics[width=0.7\textwidth]{fig_infl_thread_comments_nodes.png}
+%\end{figure}
+
+In the Appendix \ref{appendix}, we investigate the robustness of our Definition \ref{def:infl} by varying the selected percentages and making the definition more stringent. We find that the results and conclusions of our study are robust towards the selected values in Definition \ref{def:infl}. In fact, in most instances the adj. $R^2$ is lowest for the settings we chose in Definition \ref{def:infl} (refer to the Appendix \ref{appendix}). Hence we denoted above definition to ensure the settings represent a conservative choice. 
+
+Note that we have selected a data driven heuristic for vital node identification rather than existing algorithms such as those reviewed by \citet{lu2016vital}. These algorithms are based on topological structures like closeness, centrality and degree. We did apply these type of algorithms and discovered that they do not work well for our data structure. Most do not take the dynamic structure of the network into account (properly), nor the structure of Reddit and/or are not scalable to a large network. Most algorithms identify `vital nodes' that would only be active in a very short time period (during the frenzy) or have never submitted a post on Reddit, only comments. For a meaningful analysis, a vital node should not only pay attention to a topic when it is `hot'. Hence, we did not see these nodes as actual influential nodes in this network and specified Definition \ref{def:infl}. We see the development of algorithms for vital node identification in dynamic Reddit networks as an open research area. 
+
+\subsection{(Admissable) Non-vital nodes} \label{sec:nvn}
+The nodes which are not vital, we will classify as non-vital. These nodes can be seen as followers of the vital nodes (influencers). It is well known that many nodes in social networks are very infrequent communicators, as is the case for the WSB dataset, see Table \ref{tab:followers}. For example in our WSB network, 28.1\% of the nodes have posted four or more comments. Hence 71.9\% of the nodes have posted less than four comments. For nodes which have so little communications, models for change in behaviour are difficult to estimate analytically. Additionally, as these nodes communicate so infrequently in the network, they do not add to its development over time.
+
+Hence, we will focus on non-vital nodes which have sufficient communications over time and are therefore analysable in a data-driven manner. We classify nodes as \emph{admissible non-vital node} (ANVN) of vital node $i$ when that node has posted at least four comments in the posts of vital node $i$ in different time periods. This is the computationally lowest possible number of communications, as otherwise the cross-validation step of our method would not be feasible computationally. Note that this defines ANVNs in relationship to specific vital nodes (VNs). It also allows for a single node to be a follower of multiple vital nodes and for posting probability estimation between vital nodes. 
+
+%To tackle the challenge of interpretability in the presence of many parameters, we will consider LASSO for model estimation. Hence, we consider as sufficient the minimum number of communications to facilitate the estimation of model \eqref{eq:modeleq} with LASSO and cross-validation. We consider at least 4 communications in different time periods as sufficient because using cross-validation to select the tuning parameters requires that the dataset can be split into at least 3 subsets of which each needs to contain at least one communication. The computation became feasible when requiring for at least 4 communications. % as for model \eqref{eq:modeleq} estimation under LASSO and cross-validation.
+
+%To tackle the challenge of interpretability in the presence of many parameters, we will consider LASSO for model estimation. Hence, we consider as sufficient the minimum number of communications to facilitate the estimation of model \eqref{eq:modeleq} with LASSO and cross-validation. We consider at least 4 communications in different time periods as sufficient because using cross-validation to select the tuning parameters requires that the dataset can be split into at least 3 subsets of which each needs to contain at least one communication. The computation became feasible when requiring for at least 4 communications. % as for model \eqref{eq:modeleq} estimation under LASSO and cross-validation.
+%\begin{definition}
+%	A node will be classified as an \emph{admissible non-vital node} (ANVN) of vital node $i$ when that node has posted sufficient comments in the posts of vital node $i$. We define sufficient as at least 4 different time periods for model \eqref{eq:modeleq} estimation under LASSO and cross-validation.
+%\end{definition} 
+%\begin{definition}
+%	A node will be classified as an \emph{active non-vital} node (ANVN) of vital node $i$ when that node has posted comments in the posts of that vital node $i$ at least four different time periods.
+%\end{definition}
+%We observe that the definition commonly holds when 4 communications took place. % One additional reason to select 4 as the threshold is that at least 4 datapoints are needed for our model estimation. 
+
+%We set 4 as sufficient comments because we use LASSO for estimation of model \eqref{eq:modeleq} (see Section \ref{sec:modelsel}). And LASSO uses cross-validation to select the tuning parameters and this requires that the dataset can be split into at least 3 subsets, hence 3 is the absolute minimum number of required. 
+
+%Table \ref{tab:followers} gives an overview of the number of admissible non-vital nodes in the network using the above classification.  
+%Table \ref{tab:VNandNVN} gives an overview of the number of active non-vital nodes for each of the vital nodes. 
+%Note that of the 64 vital nodes only 49 have at least 1 active non-vital node (as by definition 2) in our network. 
+
+
+
+\begin{table} 
+	\caption{Nodes and number of ANVN in network classified by their posting behaviour. Many nodes are very infrequent communicators; only 28.1\% of the nodes have posted at least 4 messages. }
+	\centering
+	\begin{tabular}[t]{lrr}
+		\hline \hline
+		& No. & \% \\
+		\hline
+		No. nodes& 502,650 & 100\%\\
+		No. nodes sending at least 1 message& 498,979& 99.2\%\\
+		No. nodes sending at least 4 messages& 141,381 &28.1\%\\
+		No. ANVN & 48,213 &9.6\%\\
+		No. ANVN who follow multiple vital nodes &   2778&0.6\%\\	 
+		No. ANVN who are also a vital node&    39&$<$0.001\%\\
+		\hline \hline
+	\end{tabular}
+	\label{tab:followers}
+\end{table}
+
+
+
+
+
+%Users in a network commonly have different roles. Many networks have influencers and the user `Keith Gill' of Wallstreetbets was accused of influencing the network as to support the GME stock price. Consequently we split the users in the network into influencers and regular users. 
+
+%We model the communication from node $i$ to node $j$ as a Bernoulli variable 
+%\begin{equation} \label{eq:ber}%
+%	x_{ij,t} \sim Bernoulli(p_{ij,t})
+%\end{equation}
+%In the literature, the probability $p_{ij,t}$ is often modeled through a logit function with various features representing the overall communication intensity of the whole network, node specific elements representing the nodes tendency to communicate as well as other network or node specific elements. %See for example \citet{lee2022anomaly}, \citet{hoff2005bilinear} \textcolor{red}{check hoff article and add more references!}. 
+
+
+%\section{Influencers}
+%Influencers are nodes in a social network who drive the communication in the network. Influencer send message that attract many reactions and propagate through the network. A change in the influencers behavior can cause a change in the behavior of the nodes who follow this influencer \textcolor{red}{NEED REFERENCES TO LITERATURE}. 
+
+\subsection{Network features} \label{sec:networkfeatures}
+
+To understand posting behaviour, it is common to design features based on the network. Here we introduce our network based variables which we will use to predict posting behaviour (using our proposed ISMB modelling approach which will be introduced in section \ref{sec:method}). 
+
+\subsubsection*{Macro-structure features}
+It has been shown that overall network activity is an important factor in modelling network influence on markets \parencite{Audrino2020, Gan2020, Jiao2020}. %Social network activity is naturally dependent on the hour of the day. %Figure \ref{fig:AChourly} shows the difference in network activity by the hour of the day, indicating a higher activity during US Eastern day time. 
+Hence, we include the following overall network (macro-structure) feature:
+%\begin{align} \label{eq:AC}
+$
+AC_{t} = \log(\sum_{i,j} x_{ij,t} + 1). 
+$ %\end{align}
+%representing the log accumulated communications posted by all the users in the network at time point $t$. %The $1$ is added to avoid $\log(0)$. 
+This measures activity at time $t$. Because Reddit activity is highly dependent on the hour of the day, we also include $	AC^{24}_{k} = \log(\sum_{i,j} x_{ij,t-24*k} + 1), $ %\end{align}
+which represents the log accumulated communications posted $k$ days prior to time point $t$.\footnote{We study the WSBs network on an hourly and a 5 minute level. For the 5 minute level $x_{ij,t-24*k}$ is adjusted to $x_{ij,t-24*12*k}$.} So, when we are modelling time point $t=2$PM on a Tuesday, than $AC^{24}_{t-1}$ is the activity at 2PM on Monday and $AC^{24}_{t-2}$ is the activity at 2PM on Sunday. %The $1$ is added to avoid $\log(0)$.
+
+%We include these overall activities in the model to control for the strong changes in activity, see Figure \ref{fig:gme_price}. %In addition, as documented by \textcolor{red}{HERE 2 OR 3 PAPERS ON SOCIAL MEDIA INFLUENCE}, activity in social media networks is driven by overall activity of the entire network and attention users receive from others via engagements with their threads/comments. 
+
+\subsubsection*{Micro-structure features}
+A standard feature to include in a network model, for link prediction of node $i$, is the in- and out-degree for node $i$, defined as:
+$
+D_{i,t}^{in} = \log(\sum_{j, j \neq i} x_{ji,t}  + 1), 
+$
+and
+%representing the log accumulated posts send to node $i$ by all the users in the network at time point $t$. The $1$ is added to avoid $\log(0)$. 
+%Similarly, we include the out-degree for node $i$ obtained as:
+%\begin{align} \label{eq:outdegree}
+$	
+D_{i,t}^{out} = \log(\sum_{j, j\neq i} x_{ij,t}  + 1), 
+$
+%\end{align}
+%representing the log accumulated submits made by node $i$ to all the users in the network at time point $t$. 
+where the $1$ is added to avoid $\log(0)$.
+
+%Recall that we are modelling dyads where either the receiver or sender is a VN. 
+%As seen from Figure \ref{fig:infl_network}, the vital nodes are also connected with each other and their activity can be the driver behind posting activity. As such, we include a variable measuring the activity of all other vital nodes:
+As vital nodes play a key role in the Reddit network, we include a variable measuring their activity defined as 
+%\begin{equation*}
+$
+AC^{vn}_{i,t} = \log(\sum_{j} \sum_{h \in S_{VN}, h \neq i} x_{hj,t} + 1),  
+$
+%\end{equation*}
+where we exclude $i$ from the summation to prevent possible multicollinearity issues between $D_{i,t}^{out}$ and $	AC^{vn}_{i,t}$. 
+We also include the number of comments send to the posts of the vital node $i$. We include this in addition to the in-degree, given communication within a vital nodes' posts but sent as a response to a comment by another user is not recorded as a message to $i$. This variable is defined as,
+%\begin{equation*}
+$
+AC_{i,t}^{post} = \log(\sum_{j} \sum_{h\neq i} x_{jh,t}I(x_{jh,t} \in \text{post of } i)), 
+$ %\end{equation*} 
+representing the log accumulated submits made by all users in the network at time point $t$ to any post of node $i$, but not directly to $i$. %The $1$ is added to avoid $\log(0)$.
+
+\subsubsection*{Hourly and market-opening-hours control variables}
+Social network activity is naturally dependent on the hour of the day, therefore we include a dummy variable for each hour of the day, $Dum_{hour}$. %., since the posting behaviour on reddit is highly dependent on the hour of the day%, as illustrated in Figure \ref{fig:AChourly}.
+Also, as we are interested in analysing the network in relation to the financial markets and WSB is traded in New York, we include a dummy variable indicating if the post took place during trading hours of New York Stock Exchange (NYSE), $Dum_{wls}$. 
+
+%\begin{figure}
+%	\caption{Network activity by hour of the day (UTC time zone). We observe that network activity is dependent on the hour of the day and that there is a higher activity during US Eastern day time.}
+%	\label{fig:AChourly}
+%	\centering
+%	\includegraphics[width=0.7\textwidth]{fig_AChourly.png}
+%\end{figure}
+
+

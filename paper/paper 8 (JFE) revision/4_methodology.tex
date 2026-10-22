@@ -1,0 +1,260 @@
+In this section, we present the ISMB modelling approach for analysing the link between social network activity and market behaviour. The model consists of three building blocks which capture heterogeneous individual user behaviour and links this through innovative change point modelling to the stock market. In the first block, detailed in section \ref{sec:model_link}, we build link prediction models for the individual user pairs. In the second block, detailed in section \ref{sec:cps}, we are concerned with the determination of change points in the communication between users. In the third block, detailed in section \ref{sec:model_fin}, we investigate how the detected changes in user behaviour link to market movements. %\hl{The blocks are visualized in Figure \ref{fig:isbm}}
+
+
+%\begin{figure}
+%	\caption{\hl{The proposed Interpretable Social Network and Market Behaviour (ISBM) modelling approach for analysing the link between social network activity and market behaviour. The model consists of three building blocks, the first block captures heterogeneous individual user behaviour, the second block tracks individual change in behavior through innovative changepoint modelling and the third block relates this to the stock market.}}
+%	\label{fig:isbm}
+%	\centering
+%	\includegraphics[width=0.8\textwidth]{isbm.jpg}
+%\end{figure}
+
+
+% We are interested in how individual investors behave and when they change their behavior. Typical analysis of network effects on the markets study the network in aggregated form (\hl{insert citations}). However this is limited as \citet{Pedersen2022} shows that individual behavior is the driving forces. This however is a theoretical model without the possibility to be fitted on actual data. In addition, model that do exist for individual level network behavior are typically not scalable (\hl{INSERT ref}). We model individual node posting behaviors through a reguralized logits model with change points
+
+%\hl{Like Battacharya et al we might want to provide context to our model, by citing other literature and showing how it is placed in there and what it uses. }
+
+%we model social network interactions and how these relate to market behavior 
+%In the first paragraph we would present a multiple equal (hierarchical?) model of 
+%a.	stock variable on CPs (eq 14,15,16,17) then 
+%b.	CPS aggregated over the whole network (eq. 12 and 13) and then 
+%c.	CPs per model (eq 11)  and finally 
+%d.	the logit model (eq 6 and 7). 
+%Next we would have various subsections explaining each part in detail (this would come from current section 3 and 5).
+
+%\subsection{Model specification}
+%We observe 1) on an hourly basis a network with $N$ users and their interactions $x_{ij,t}$ over a period of a year and 2) the GME returns and trading volume for all trading hours in the same year. We develop a model to link the network posting behavior to the GME market behavior. This consists out of four parts: i) a link prediction model, ii) a exhaustive change point search algorithm, iii) linking change points to the GME stock behavior. Each of these three is discussed in subsequent subsection in detail below.
+
+\subsection{Interpretable and scalable link prediction} \label{sec:model_link}
+We are interested in analysing the determinants of users posting behaviour. Therefore, we choose to model the network via link prediction models for each node pair. This individual approach enables us to estimate a dedicated model for each node pair, capturing the heterogeneous behaviour of nodes. Additionally, by design, this approach is scalable as it is easily parallelized and hence we circumvent the issue of estimating one model for a network of 502,650 nodes.  %This is motivated Users posting probability to one another can be triggered by ones' own past communication with another node or activity of influential nodes, to name a few, as shown by \textcite{Guille2012}. In addition, strong differences in user activity over time suggest that changes happen in the network, see Figure \ref{fig:gme_price}. 
+We consider a parametric framework based on a logit model: %The model is designed for link prediction on Reddit conditional on variables such as past node activity, network activity, etc., in the presence of changes of users behaviour: 
+\begin{equation} \label{eq:modeleq}
+	P[x_{ij,t}=1] =\text{logit}(\Theta X + \epsilon_{ij,t}), 
+\end{equation}
+where $\text{logit}^{-1}(z)=\frac{1}{1+\exp(-z)}$ is the logistic link function applied to a linear combination of features $X$, extracted from the network and $\Theta$ is the parameter matrix.
+%Equipped with the model in equation \eqref{eq:modeleq}, we study the microstructure of the network. 
+%A number of challenges arise when fitting this model to large scale networks like WSB and Reddit in general:
+%\begin{enumerate}
+%	\item Typically subreddits have many nodes, i.e. on WSB $n=502,650$ nodes discuss GME. This means that we have to model $n^2$ dyads. The huge number of models to estimate presents a computational challenge. %and raises the question if every dyad requires modelling. 
+%	\item  Which variables are reasonable to include in the feature matrix $X$ in order to capture the dynamics of the network microstructure? %Additionally, is it relevant to account for time dependent relationships between users posting behaviour and the variables impacting them? 
+%	\item How to estimate the number of change points $S$ and their respective locations? How do we prevent overfitting on the number of changepoints?
+%	\item How do we ensure interpretable modelling results in the presence of a large parametric model, in order to facilitate an understanding of how the microstructure changes and influences the markets?
+%\end{enumerate}
+%In the remainder of this subsection, we will introduce our proposed strategy to deal with one of the mentioned challenges. 
+
+%\subsubsection{Nodal importance: model fitting for relevant dyads only}
+%Typically subreddits have hundreds of thousands of nodes; WSB had 17 million subscribers at the time of writing. In our WSB dataset there are $502,650$ nodes, a subset of all the nodes on WSB as we only include nodes that actually posted or commented in a post with GME in the title. 
+%We define our model for each possible dyad, however this computationally infeasible due to the size of the network and because nodes tend to communicate within only a very small subgroup of other nodes. %A feature of Reddit is that nodes send messages in response to a post. 
+To reduce the computational burden, we capitalize on the concepts of nodal importance to reduce the number of models that we will estimate. Using the classifications for vital nodes (cf. section \ref{sec:vn}) and admissible non-vital nodes (cf. section \ref{sec:nvn}), we define a set of vital nodes $S_{VN}$  and a set of ANVNs, $S_{ANVN}$. Then we estimate our model (Eq. \eqref{eq:modeleq}) for $j \in S_{VN}$ and $i \in S_{VN} \cup S_{ANVN}$. This results in a total of $51,245$ models to estimate, which is a tremendous reduction from the $n^2=502,650^2$ possible models to fit. %and therefor solves our first challenge. 
+%This is based on the rational that links between less important nodes are less relevant for the network's development. 
+%We only estimate $P[x_{ij=1}]$ (Eq. \eqref{eq:modeleq}) for $j$'s who are vital nodes, refer to definition \ref{def:infl}. We reduce the number of models to be fitted further by restricting $i$ to be either a vital node or an admissible non-vital node (ie nodes who communicate regularly within posts of vital nodes). 
+
+%Next, %we define vital nodes (Section \ref{sec:vn}), non-vital nodes (Section \ref{sec:nvn}) and then 
+%discuss the variables that we include in the feature matrix $X$.
+
+%\subsection{Construction of feature matrix $X$: variables to capture network structure} \label{sec:xmatrix}
+To estimate equation \eqref{eq:modeleq} we need to select features to include in the $X$ matrix.  An overview of the included features is given in Table \ref{tab:features_fol}, which were detailed in section \ref{sec:networkfeatures}. %Network data have very specific structures that are well studied in the network science literature. 
+This includes variables representing the VNs' and ANVNs' behaviour, such as posting frequency (out-degree), in-degree, and the nodes' past behaviour, in line with findings of \citet{bhattacharya2019coevolution, Lu2013,Yu2022monitoring}. Further, we include overall network activity, which is known to be an important factor in modelling social network influence on markets. Also, behaviour of people is observed over time and their reaction to posts may have a time lag, therefor we include K lags of all features. %To integrate these various factors (microstructure, macrostructure, and time lags), we construct our feature matrix from contemporaneous and time-lagged variables, representing network features. 
+In addition, we include a set of control variables. %and motivated in more detail below. 
+%This leads to 2 different specifications of Eq. \eqref{eq:modeleq}, one for the vital nodes and one for the non-vital nodes. Next, we will introduce and motivate the construction of the variables, we include three types of variables: micro-structure features, macro-structure features, and control variables. 
+%This forms our feature matrix. 
+
+\begin{table} 
+	\caption{Features included in $X$. We include two groups of network dependent features: micro-structure, macro-structure as well as control variables. All features, except the controls, are included with K lags as part of our link prediction model (equation \ref{eq:modeleq}) for VNs and ANVNs.}
+	\label{tab:features_fol}
+	\centering
+	\begin{tabular}[t]{llll}
+		\hline \hline
+		Type&Variable & Description  &VN and/or \\
+		&&&ANVN model\\
+		\hline \hline
+		Dependent&$x_{ij,t}$& Comment send from $i$ to $j$  &both\\
+		\hline
+		Micro-&$D^{in}_{i,t}$ &In-degree of $i$: number of comments send to $i$   &both \\		
+		structure&$D^{out}_{i,t}$ &Out-degree of $i$: number of comments send by $i$  & both \\		
+		&$D^{in}_{j,t}$ &In-degree of $j$: number of comments send to $j$   &ANVN \\		
+		&$D^{out}_{j,t}$ &Out-degree of $j$: number of submits by $j$   &ANVN \\		
+		&$AC^{vn}_{j,t}$ &No. of submits by all other vital nodes (excluding $j$)   &both \\		
+		&$AC^{post}_{j,t}$ &No. of comments within any post of VN $j$  &both \\		
+		\hline
+		Macro-&$AC_t$ & Overall network activity  &both \\
+		structure&$AC^{24}_k$ &  Overall network activity $k$ days prior to time $t$ &both \\
+		\hline		Control&$Dum_{wls}$  & Dummy indicating trading hours &both\\
+		&$Dum_{hour}$ & 24 dummies for each hour &both \\
+		\hline \hline
+	\end{tabular}
+\end{table}
+
+%\subsubsection{Constructed feature matrix $X$}
+%Using the defined features we construct the feature matrices $X$. We make a distinction between models for vital nodes, i.e. $P[x_{ij}=1]$, where $i=j$ and $i \in S_{VN}$, and models for admissible non-vital nodes $P[x_{ij}=1]$, where $i \neq j$ and $j \in S_{VN}$ and $i \in S_{ANVN} \cup S_{VN}$. %A summary of the included features in the vital nodes models is given in Table \ref{tab:features}. 
+Hence, we set up the following 64 models, one for each VN: 
+\begin{align} \label{eq:infl_model}
+	\text{logit}(AX+\epsilon_{ii,t}) = \text{logit} (&\theta_0 + \sum_{k=1}^K [ \theta_{1,k} x_{ii, t - k} 
+	+ \theta_{2,k} D_{i, t - k}^{in}  + \theta_{3,k} D_{i, t - k}^{out} \nonumber\\
+	+ &\theta_{4,k} AC_{i,t-k}^{vn} + \theta_{5,k} AC^{post}_{i,t-k} 
+	+ \theta_{6,k} AC_{t - k} + \theta_{7,k} AC_{k}^{24} ] \\
+	+ &\theta_8 Dum_{wls}+ \sum_{h=1}^{24} \theta_{9,h} Dum_{hour, h}    \nonumber 
+	+ \epsilon_{ii,t} ), \nonumber
+\end{align}
+where $K$ is the number of lags included in the model. %$\sigma^{-1}(z)= \frac{1}{1+\exp(-z)}$  is the logistic function applied to a linear combinations of features extracted from the network. 
+%\begin{table} 
+%	\caption{Feature included in $X$ for the vital node models}
+%	\label{tab:features}
+%	\centering
+%	\begin{tabular}[t]{llll}
+%		\hline \hline
+%		Type&Variable & Description & Scale\\
+%		\hline \hline
+%		Dependent&$x_{ii,t}$& Posts and self-comments by VN & binary \\
+%		\hline
+%		Micro-&$D^{in}_{i,t}$ &In-degree of node $i$: number of submits to node $i$ at time $t$ & log(a+1) \\		
+%		structure&$D^{out}_{i,t}$ &Out-degree of node $i$: number of submits by node $i$ at time $t$ & log(a+1) \\		
+%		&$AC^{vn}_{i,t}$ &Number of submits by all other vital nodes (excl. $i$) at time $t$ & log(a+1) \\		
+%		&$AC^{post}_{i,t}$ &Number of comments within any post of VN $i$ at time $t$ & log(a+1) \\		
+%		\hline
+%		Macro-&$AC_t$ & Overall network activity at time $t$ & log(a+1) \\
+%		structure&$AC^{24}_k$ & Overall network activity $k$ days prior to time $t$ & log(a+1) \\
+%		\hline
+%		Controls&$Dum_{wls}$  & Dummy indicating trading hours & binary\\
+%		&$Dum_{hour}$ & 24 dummies for each hour &binary \\
+%		\hline \hline
+%	\end{tabular}
+%\end{table}
+%\section{Followers}
+%
+%Followers in social networks are nodes that \textcolor{red}{LOOK INTO LITERATURE ON FOLLOWERS IN SOCIAL NETWORKS}
+%The active non-vital nodes are defined by their posting behaviour towards the vital nodes. Similar to the vital nodes, we also set up a model for each edge connecting an active non-vital node $i$ and a vital node $j$. The parameters included in the model are similar to the one for the vital nodes model but we add 3 extra parameters: The in-degree of the ANVN $D^{in}_{j,t}$, the out-degree of the ANVN $D^{out}_{j,t}$ and the edge between the ANVN $i$ and VN $j$, $x_{ij,t}$. The in- and out-degree of the ANVN are defined similarly to equations \ref{eq:indegree} and \ref{eq:outdegree}. 
+%For the followers we also set up models for $p_{ij}$, for each follower $i$-influencer  $j$ combination. 
+For the admissible non-vital nodes and their communication with a vital node, %the model includes features related to the ANVN as well as to the VN. An overview of the included features is given in Table \ref{tab:features_fol}. 
+we set up the following 51,181 models, one for each relevant ANVN-VN pair: 
+\begin{align} \label{eq:mod_fol}
+	\text{logit}(AX+\epsilon_{ij,t}) = \text{logit} (&\theta_0 + \sum_{k=1}^K [ \theta_{1,k} x_{ij, t - k} 
+	+ \theta_{2,k} D_{i, t - k}^{in} + \theta_{3,k} D_{i, t - k}^{out} + \theta_{4,k} D_{j, t - k}^{in} \nonumber \\ 
+	& + \theta_{5,k} D_{j, t - k}^{out} 
+	+ \theta_{6,k} AC_{j, t - k}^{vn} + \theta_{7,k} AC^{post}_{j,t-k} + \theta_{8,k} AC_{t - k} \\
+	&  + \theta_{9,k} AC^{24}_{k} ]
+	+ \theta_{10} Dum_{wls}+ \sum_{h=1}^{24} \theta_{11,h} Dum_{hour, h}   
+	+ \epsilon_{ij,t} ). \nonumber
+\end{align}
+
+
+\subsection{Changes in behaviour via change point identification} \label{sec:cps}
+
+It is well known that social networks are highly dynamic and that individuals change their posting behaviour over time \citep{Aral2014,bhattacharya2019coevolution,Deng2024}. In addition, \textcite{Pedersen2022} motivates that the change in network behaviour can spill over into financial markets. To link individual change behaviour to the stock market behaviour, we have chosen to conduct a change point approach to identify if and when users change their behaviour. For the model in equation \eqref{eq:modeleq}, we consider a change point structure:
+\begin{equation} \label{eq:modeleqcps}
+	P[x_{ij,t}=1] = \sum_{s=1}^{S+1} \text{logit}(\Theta_sX + \epsilon_{ij,t})\mathbbm{1}(\tau_{s-1}<t \leq \tau_s), 
+\end{equation}
+where $S$ equals the number of change points that occur at time points $\tau_s$, where $1 < \tau_1 <\tau_2<...<\tau_S\leq T$ and $\mathbbm{1}(\cdot)$ is the indicator function. We set $\tau_0=1$ and $\tau_{S+1}=T$.  
+
+\begin{figure}
+	\caption{The three step algorithm for change point identification. In Step A, a rolling window approach is being used to identify one change point per window. In Step B, the powerset of these change points is being constructed to identify the potential change point combinations. In Step C, the best combination of change points as by maximum likelihood of the underlying models is being identified while including the possibility of having no change point. }
+	\label{fig:cp_search.jpg}
+	\centering
+	\includegraphics[width=0.8\textwidth]{fig_cp_search.jpg}
+\end{figure}
+
+We specify a change point detection framework. The method is based upon a greedy algorithm for searching for multiple change points in time series data. The method works by first identifying candidate change points by searching for a single change point in a rolling window and then combine these into possible change point sequences, as done in e.g. \textcite{bai2023multiple}. Our implementation of this general framework is visualized in Figure \ref{fig:cp_search.jpg}. The algorithm we propose consists of three steps (A-C), is entirely data driven, and is implemented as an exhaustive search algorithm:
+\begin{enumerate}[label=Step \Alph*:]
+	\item Identify change point candidates by conducting a rolling window search and identifying a single (possible) change point in each window.
+	\item Obtain all possible change point sequences by constructing a set of unique change points and building the powerset.
+	\item Select the best change point sequence by estimating a model for each combination of change points and selecting the best model and related change point sequence.
+\end{enumerate} 
+We provide a detailed description for steps A-C in the Appendix \ref{appendix}. The resulting model with the identified change points typically has hundreds of parameters, challenging the interpretability of the parameters. To tackle this issue, we perform LASSO regularization \citep{tibshirani_regression_1996}, which is an often applied technique in network analysis \citep{Barigozzi2019, Trimborn2022a, Trimborn2022, Zhang2023}. The LASSO enables us to estimate sparser models, allowing for an interpretable model. 
+
+To evaluate whether our model with change points (i.e. equation \eqref{eq:modeleqcps}) statistically significantly outperforms a model without change points (i.e. equation \eqref{eq:modeleq}) we compute the Vuong test \citep{Vuong1989} for overlapping models, as the models potentially overlap. We only include models with change points if they show a better fit at a 5\% significance level. 
+
+\subsection{Linking the network to the market} \label{sec:model_fin}
+To determine the validity of the hypothesis that social network users change in behaviour affects the markets, we analyse if the change in individual users' posting behaviour on the social networks relates to stock market activity. For this we first define the variables $CP_t^{VN}$ and $CP_t^{ANVN}$, measuring the number of change points occurring at time point $t$ of the VNs and ANVNs:
+\str{
+\begin{align}
+	\label{eq:spec1}
+	CP_t^{VN} &= \log( \sum_{j \in S_{VN}, i = j} \sum_{r = 1}^R \mathbbm{1}(cp_r^{ij} = t) ) \\
+	CP_t^{ANVN} &= \log( \sum_{j \in S_{VN}, i \in S_{VN} \cup S_{ANVN}, i \neq j} \sum_{r = 1}^R \mathbbm{1}(cp_r^{ij} = t) ). 
+\end{align}
+}
+where $cp^{ij}_r$ with $r=1,..,R$ are the selected change points for node pair $i$ and $j$ (ie. the output from step C). 
+
+We study the market activity by considering returns, \str{volatility, trading volume and option trading volume}. As the changes in users behaviour are observed at an hourly frequency, we consider hourly returns. From 5-minute price data for GME, we construct the realized volatility for every hour. Provided GME experienced large price swings with intraday jumps, we split the volatility into the integrated volatility (IV) and the jump component (JV) with the \textcite{Andersen2007} estimation procedure. \str{Trading Volume is observed as an aggregate over the past hour. Since a lot of trading activity from WSB users occurred on option markets, we also analyse the Option Trading Volume aggregated over the past hour.} 
+Due to the high market activity surrounding the frenzy, we take the measured 5-minute frequency changes in behaviour of the WSB users and also analyse this effect during the frenzy. For this, we derive returns, integrated volatility, and jump volatility for 5-minute frequency from 1-minute return observations \str{as well as observe trading volume and option trading volume at 5-minute frequency}. 
+
+%Each model, but the jump volatility model, contains its own past lags of the time series. We do not add past jumps into its prediction model since jumps occur independently of each other by their very nature and definition. Each model further contains the contemporaneous and past network activity, a well established predictor for market movements. As further control variables, we add commonly used network statistics such as log mean distance, log mean degree and the log number of active nodes to the prediction models of the returns, integrated volatility, and jump volatility. We investigate then if the addition of contemporaneous and past changes in behaviour of vital and admissible non-vital users has an impact on the market. 
+
+We estimate the following model: 
+\begin{equation}
+	\label{eq:ret}
+	M_t = \alpha_0 + 
+	\sum_{k=1}^{K} \alpha_k M_{t-k} + 
+	\sum_{k=0}^{K} \beta^{VN}_k CP_{t-k}^{VN} + 
+	\sum_{k=0}^{K} \beta^{ANVN}_k CP_{t-k}^{ANVN} + 
+	\sum_{k=0}^{K} \beta^{AC}_k AC_{t-k} + 
+	\sum_{k=0}^{K} \sum_{i=1}^{M} \beta^{i}_k w^{i}_{t-k} + \epsilon_t.
+\end{equation}
+ 
+where $M_t$ is the market variable at time $t$, which is either the return ($r_t$), integrated volatility ($IV_t$), jump volatility ($JV_t$), \str{trading volume ($TV_t$), or the option trading volume ($OTV_t$)}. % are defined as follows:the log return of GME, $CP_{t}^{VN}$ the accumulated change points of vital nodes at time point $t$, $CP_{t}^{ANVN}$ the accumulated changepoints of non-vital nodes at time point $t$, $AC_t$ the network activity at time point $t$ 
+The variable $CP$ are the change point variables \str{on a log scale}, as defined in equations \eqref{eq:spec1} and (6), $AC$ is the overall network activity \str{on a log scale}, a well established predictor for market movement. Further $W$ is a $T \times p$ matrix consisting of $p$ network related variables, which are included as control variables. As variables in $W$, we consider various variables which measure the network activity and importance of nodes. Specifically, we include the log mean distance, log mean degree and the log number of active nodes. 
+%For the integrated variance, the model reads
+Note that jumps are assumed to appear independent of each other, by the nature of their definition, hence for the jump volatility  model we exclude time-lagged $JV$ variables from equation \ref{eq:ret}. 
+This allows us to investigate if the addition of contemporaneous and past changes in behaviour of vital and admissible non-vital nodes has an impact on the market. 
+%\begin{equation}
+%	\label{eq:IV}
+%	IV_t = \alpha_0 + 
+%	\sum_{k=1}^{K} \alpha_k IV_{t-k} + 
+%	\sum_{k=0}^{K} \beta^{VN}_k CP_{t-k}^{VN} + 
+%	\sum_{k=0}^{K} \beta^{ANVN}_k CP_{t-k}^{ANVN} + 
+%	\sum_{k=0}^{K} \beta^{AC}_k AC_{t-k} + 
+%	\sum_{k=0}^{K} \sum_{i=1}^{M} \beta^{i}_k x^{i}_{t-k} + \epsilon_t.
+%\end{equation}
+%where $IV_t$ is the integrated variance of GME and the further variables are defined alike to model (\ref{eq:ret}). 
+
+%Alike to the model (\ref{eq:IV}), we specify the following model for the jump component $JV_t$: 
+%\begin{equation}
+%	\label{eq:JV}
+%	JV_t = \alpha_0 + 
+%	\sum_{k=0}^{K} \beta^{VN}_k CP_{t-k}^{VN} + 
+%	\sum_{k=0}^{K} \beta^{ANVN}_k CP_{t-k}^{ANVN} + 
+%	\sum_{k=0}^{K} \beta^{AC}_k AC_{t-k} + 
+%	\sum_{k=0}^{K} \sum_{i=1}^{M} \beta^{i}_k x^{i}_{t-k} + \epsilon_t.
+%\end{equation}
+%For the trading volume, the model reads
+%\begin{equation}
+%	\label{eq:vol}
+%	TV_t = \alpha_0 + 
+%	\sum_{k=1}^{K} \alpha_k TV_{t-k} + 
+%	\sum_{k=0}^{K} \beta^{VN}_k CP_{t-k}^{VN} + 
+%	\sum_{k=0}^{K} \beta^{ANVN}_k CP_{t-k}^{ANVN} + 
+%	\sum_{k=0}^{K} \beta^{AC}_k AC_{t-k} + 
+%	\sum_{k=0}^{K} \sum_{i=1}^{M} \beta^{i}_k x^{i}_{t-k} + \epsilon_t.
+%\end{equation}
+
+
+%We specify two models, one investigating the contemporaneous effect of the users variables and another one investigating the time lagged effect. The contemporaneous model as defined as: 
+%\begin{equation}
+%	\label{eq:return_contem}
+%r_t = \alpha_1 r_{t-1} + \sum_{i=1}^{M} \beta_i x_{i, t} + \epsilon_t
+%\end{equation}
+%where $r_t$ is the log return of GME, and $X$ is an $T \times M$ matrix consisting of $M$ network related variables. As variables in $X$ we consider various variables which measure the network activity and importance of nodes. Specifically we include the network activity $AC$, the log mean distance, log total degree, log mean degree and the log number of active nodes. We further consider the changepoints of the vital and non-vital nodes occurring at time point $t$. Alike the time lagged model is defined as:
+%\begin{equation}
+%	\label{eq:return_timelagged}
+%r_t = \alpha_1 r_{t-1} + \sum_{i=1}^{M} \beta_i x_{i, t-1} + \epsilon_t.
+%\end{equation}
+
+%In a second analysis we consider the realized volatility of GME derived from the HLOC data based on the estimator suggested by \textcite{Garman1980}. The contemporaneous model for the realized volatility is defined as follows: 
+%\begin{equation}
+%	\label{eq:rv_contem}
+%RV_t = \alpha_1 RV_{t-1} + \sum_{i=1}^{M} \beta_i x_{i, t} + \epsilon_t
+%\end{equation}
+%with $RV_t$ the realised volatility at time point $t$ and $X$ defined as before. 
+%Alike the time lagged model is defined as:
+%\begin{equation}
+%	\label{eq:rv_timelagged}
+%	RV_t = \alpha_1 RV_{t-1} + \sum_{i=1}^{M} \beta_i x_{i, t-1} + \epsilon_t.
+%\end{equation}
+
+
+
+%In a second specification we consider that changes in a users behaviour may have a time lagged effect on the markets and network. We model the effect of a users past changepoints at time point $t$ with an exponential smoother:
+%\begin{align}
+%	\label{eq:spec2}
+%	VN_{ews;t} &= \lambda * VN_{ews;t-1} + VN_{t} \\
+%	NVN_{ews;t} &= \lambda * ANVN_{ews;t-1} + ANVN_{t}
+%\end{align}
+%with $\lambda$ the exponential smoothing parameter. 

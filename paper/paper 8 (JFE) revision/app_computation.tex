@@ -1,0 +1,7 @@
+%appendix computation time
+The ISBM method presented in this study is a very greedy algorithm and therefore is time consuming to run. We incorporate the following strategies to speed up computation:
+\begin{itemize}
+	\item In step A, the algorithm computes the likelihood over the window for each possible change point in the window. To speed up this step, we first compute the likelihood for each 12th change point in the window using the change point which yields maximum likelihood. Then we compute the likelihood for the change point in all 11 steps before and after the identified change point and use the change point that gives the maximum value as the final result.  
+	\item The set $S_{\tau}$ often consists of many possible change points resulting in $P(S_{\tau})$ having a large number of elements. To prevent overfitting and to speed up computation, we exclude all elements of 5 or more change points from $P(S_{\tau})$. Our final results (see section 5) show that the maximum number of identified change points is 3, so this does not seem a restrictive strategy.
+	\item  The set $S_{\tau}$ often consists of many possible change points that are close together. We therefore restrict the set $P(S_{\tau})$ to have only elements for which consecutive change points are at least $k$ time units apart. From an interpretation point of view it seems reasonable to assume that a Reddit user does not change his/her behaviour too frequently. In addition, estimating models for sparse data in such short time spans is challenging. 
+\end{itemize}

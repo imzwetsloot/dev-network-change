@@ -1,0 +1,43 @@
+
+\input{Returnmodels1_5min_t.tex}
+\input{IVmodels1_5min_t.tex}
+\input{Jmodels1_5min_t.tex}
+\input{Volumemodels1_5min_t.tex}
+
+%\input{Returnmodels1_5min_t_old.tex}
+%\input{IVmodels1_5min_t_old.tex}
+%\input{Jmodels1_5min_t_old.tex}
+
+We compute the 5-minute RV from the minute-by-minute returns of GME and construct the IV and JV by the \textcite{Andersen2007} method, similar as for the hourly data. \str{To incorporate that we found significant change point variables affecting the market variables in the hourly analysis, we expand the model to include respective variables. We define \(\bar{M}_h\), \(\overline{CP}^{VN}_h\), \(\overline{CP}^{ANVN}_h\), \(\overline{AC}_h\), and \(\bar{w}^{i}_h\) as the hourly measures constructed for hour \(h\) using the definitions employed in the hourly analysis. Let \(h(t)\) denote the hour containing the five-minute observation interval \(t\). The hourly regressors enter the model with indices \(h(t)-j\), where \(j=1,\ldots,H\) denotes the lag in hours. Thus, each hourly regressor is constant across all twelve five-minute observations within a given hour. We set \(H=7\), so that the measures constructed over the immediately preceding $7$ hours are used for all five-minute observations in the current hour, which matches the setting from the hourly analysis. }
+
+\str{\begin{align}
+		\label{eq:ret}
+		M_t &= \alpha_0 + 
+		\sum_{k=1}^{K} \alpha_k M_{t-k} + 
+		\sum_{k=0}^{K} \beta^{VN}_k CP_{t-k}^{VN} + 
+		\sum_{k=0}^{K} \beta^{ANVN}_k CP_{t-k}^{ANVN} + 
+		\sum_{k=0}^{K} \beta^{AC}_k AC_{t-k} + 
+		\sum_{k=0}^{K} \sum_{i=1}^{M} \beta^{i}_k w^{i}_{t-k} \\&+ 
+		\sum_{j=1}^{H} \gamma_j^{M}\bar{M}_{h(t)-j}
+		+ \sum_{j=1}^{H} \gamma_j^{VN}
+		\overline{CP}^{VN}_{h(t)-j}
+		+ \sum_{j=1}^{H} \gamma_j^{ANVN}
+		\overline{CP}^{ANVN}_{h(t)-j} 
+		+ \sum_{j=1}^{H} \gamma_j^{AC}
+		\overline{AC}_{h(t)-j}
+		+ \sum_{j=1}^{H}\sum_{i=1}^{M}
+		\gamma_j^{i}\bar{w}^{i}_{h(t)-j}
+		+ \epsilon_t .
+\end{align}}
+
+We estimate the models with 12 lags, representing the lagged observations of the past hour, \str{and with 7 hourly lags for the hourly variables, just like in the hourly analysis. We} summarise the results in Tables \ref{Returnmodels1_5min_t}, \ref{IVmodels1_5min_t},  \ref{Jmodels1_5min_t}, \str{\ref{Volumemodels1_5min_t}, and XXX %, and \ref{Volumemodels1_5min_t}, 
+for return, IV, JV, TV, and OTV} respectively. \str{For the return predictability during the frenzy period, we observe that adding the VN and ANVN to the model increases the adjusted $R^2$ strongly, just as in the hourly setting. Most recent change points in VNs behaviour do not significantly affect it, instead the 7 hour lagged VN variable does. This is consistent with the findings for the hourly setting, that it takes a while for the VNs change in behaviour to spill over into the markets. The change in behaviour of the ANVNs affects markets faster during the frenzy, just as during the hourly setting.} As for IV, \str{the $R^2$ levels are comparable to the hourly setting.} Considering both VN and ANVN, increases the adj. $R^2$ to \str{$0.227$} whereas a model consisting only of lagged variables spanning the past IV's, provides an adj. $R^2$ of \str{$0.179$}. For the VN we observe that \str{5 minute level variables from the past hour are significant}, hence the impact from a change in behaviour of the vital nodes during the market frenzy affects the integrated volatility of GME immediately. \str{Also the effect from the hourly lagged VNs is occurring faster.} For the ANVNs, a change in their behaviour transmits \str{equally fast than for the hourly setting to the IV. Furthermore, most lags at the 5-minute and hourly aggregation level are significant during the frenzy period.} Next, we analysed if conventional network statistics proxy the explained movements from the VN and ANVN. The adjusted $R^2$ is much lower and renders it worse than the models containing only the VN and ANVN's. Considering all variables jointly results in an adjusted $R^2$ lower than the one for the model not containing the network statistics. This suggests that the VN and ANVN better explain the dynamics of the integrated variance than the conventional network statistics. 
+
+Switching focus towards the jump part of the realised variance, JV, we observe that the models do not explain the jump dynamics well, compare Table \ref{Jmodels1_5min_t}. The adjusted $R^2$ is very low, almost zero, or negative for most models, suggesting that the 5-minute jumps in volatility during the market frenzy are not determined by the WSB dynamics. As we consider the 2 weeks before and after the GME price peak, we have to take into account that many notable events surrounding the GME frenzy saga took place during this time, which caused market disturbances not incited by WSB, such as the ban of Robinhood on buying GME, insults of research firms towards WSB investors or support of GME from public figures such as Elon Musk. 
+
+Moving focus towards the 5-minute \str{trading volume} dynamics during the market frenzy, \str{we observe that the TV dynamics are poorly explained by past dynamics of the variables, see Table \ref{Volumemodels1_5min_t}. This finding is consistent with what we observed for the predictability of trading volume in the hourly setting.} 
+
+\textcolor{green}{OTV MISSING, ADD ONCE DATA OBTAINED}
+%As for the modelling of the 5-minute trading, compare Table \ref{Volumemodels1_5min_t}, we observe that adding the network activity variable, AC, to the lagged TVs does not improve the adjusted $R^2$, instead keeps its value similar compared to the model utilising only the lagged TVs. Note that also the lagged TVs provided only a low $R^2$ of only 0.01, however with several significant parameters. The models containing the VN and ANVN result into negative adjusted $R^2$. This implies that the WSB network activity does impact the trading volume dynamics however the behavioural changes in VN and ANVN do not during the market frenzy. 
+
+To sum up, we conclude that during the market frenzy, the return and integrated variance is explained by the behavioural changes of the VN and ANVN whereas the JV is largely unaffected by the network variables and measures. \str{For the trading volume, we observe that the variables do not explain its dynamics.} %WSB network activity and various network measures improve their explainability, however VN and ANVN do not. This implies that metrics derived from the WSB network do explain the market movements of GMEs stock price, whereas the behavioural changes of the VN and ANVN explain the integrated variance of GME. 
