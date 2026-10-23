@@ -44,7 +44,7 @@ if (processes > 1) {
 files <- list.files(paste0(folder,"/inputmatrix"))
 files<-files[length(files):1]
 n.files= length(files)
-
+n.files=100
 tic.clearlog()
 
 
