@@ -139,3 +139,39 @@ plot(fig)
 dev.off()
 plot(fig)
 
+
+#############################################################################
+##################Create figure boxplot change in parameter value ####
+#############################################################################
+
+# difference in parameter value at the change point: after - before
+# leave out pairs that are 0 before and after (variable not selected in either model)
+box_df <- trans %>%
+  filter(cat != "Inactive") %>%
+  mutate(diff     = after - before,
+         par_group = factor(par_group, levels = grp_levels))
+
+# number of NVN x VN x model x variable combinations per box, shown above the boxes
+n_box <- box_df %>% count(par_group)
+
+file.fig = paste0(folder3,"/",folder,"/fig_nvn_parameters_boxplot_diff.png")
+png(file.fig,width=1000,height=600)
+
+# create plot
+fig2<-ggplot(box_df, aes(x = par_group, y = diff)) +
+  geom_hline(yintercept = 0, colour = "grey20") +
+  geom_boxplot(fill = "#8db8ea", colour = "grey20", width = 0.6,
+               outlier.size = 0.8, outlier.alpha = 0.5) +
+  geom_text(data = n_box, aes(x = par_group, y = Inf, label = paste0("n=", n)),
+            vjust = 1.5, size = 3.2, colour = "grey35") +
+  scale_x_discrete(limits = grp_levels, labels = grp_labels) +
+  labs(title = "Change in parameter value at the change point for non-vital nodes (NVNs)",
+       x = NULL, y = "Parameter value after CP - parameter value before CP") +
+  theme_minimal(base_size = 11) +
+  theme(axis.text.x = element_text(angle = 30, hjust = 1),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor   = element_blank(),
+        plot.title.position = "plot")
+plot(fig2)
+dev.off()
+plot(fig2)
