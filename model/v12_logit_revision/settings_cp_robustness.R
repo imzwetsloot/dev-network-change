@@ -31,15 +31,16 @@ ts <-data.frame(period_num=period_num,
 ts$unix = fPeriodtoUNIX(ts$period_num,start,Aggregationmin)
 ts$period_dt = fUNIXtoDT(ts$unix)
 
+#original settings of our study
 if(setting=="A"){
   #rolling window
   if(Aggregation == "hour"){
-    rolling.window = 2*30*24 #robustness check include larger/smaller windows
+    rolling.window = 2*30*24 #length rolling window 2 months
     step=168   #steps between rolling windows week
     t.between.cps = 168 #minimum time between two consequtive changepoints
     cpstep = 12 #to speed up code first eveluate cps by step and then fill in the gap
   }else if (Aggregation == "5minute"){
-    rolling.window = 7*24*12 #4*24*12 #3*24*60 #robustness check include larger/smaller windows
+    rolling.window = 7*24*12 #one week rolling window #4*24*12 #3*24*60
     step= 12*24 #12*4   #steps between rolling windows  = 1 day
     t.between.cps =12*24 #minimum time between two consequtive changepoints
     cpstep = 12 #to speed up code first eveluate cps by step and then fill in the gap
@@ -48,26 +49,26 @@ if(setting=="A"){
   #rolling window
   if(Aggregation == "hour"){
     rolling.window = 3*30*24 #three months instead of two month 
-    step=168   #steps between rolling windows week
-    t.between.cps = 168 #minimum time between two consequtive changepoints
-    cpstep = 12 #to speed up code first eveluate cps by step and then fill in the gap
+    step=168   #same as A
+    t.between.cps = 168 #samen as A
+    cpstep = 12 #same as A
   }else if (Aggregation == "5minute"){
     rolling.window = 14*24*12 #two weeks instead of standard one
-    step= 12*24 #12*4   #steps between rolling windows  = 1 day
-    t.between.cps =12*24 #minimum time between two consequtive changepoints
-    cpstep = 12 #to speed up code first eveluate cps by step and then fill in the gap
+    step= 12*24 #same as A
+    t.between.cps =12*24 #same as A
+    cpstep = 12 #same as A
   }
-} else if(setting== "C"){ #three months window
+} else if(setting== "C"){ #one months window
   #rolling window
   if(Aggregation == "hour"){
     rolling.window = 1*30*24 #one month instead of two month 
-    step=168   #steps between rolling windows week
-    t.between.cps = 168 #minimum time between two consequtive changepoints
-    cpstep = 12 #to speed up code first eveluate cps by step and then fill in the gap
+    step=168   #same as A
+    t.between.cps = 168 #same as A
+    cpstep = 12 #same as A
   }else if (Aggregation == "5minute"){
     rolling.window = 3*24*12 #half a  week instead of standard one
-    step= 12*24 #12*4   #steps between rolling windows  = 1 day
-    t.between.cps =12*24 #minimum time between two consequtive changepoints
-    cpstep = 12 #to speed up code first eveluate cps by step and then fill in the gap
+    step= 12*24 #same as A
+    t.between.cps =12*24 #same as A
+    cpstep = 12 #same as A
   }
 }

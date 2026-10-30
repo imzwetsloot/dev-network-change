@@ -5,7 +5,7 @@
 
 rm(list=ls(all=TRUE))
 
-libraries = c("tidyr","dplyr","ggplot2")
+libraries = c("knitr","tidyr","dplyr","ggplot2")
 lapply(libraries, function(x) if (!(x %in% installed.packages())) {
   install.packages(x)
 })
@@ -17,7 +17,7 @@ Aggregation = "hour" ; Aggregationmin=60; folder="data_hour"
 
 #minimum number of communications a model needs to be included
 #4 is the baseline (inputmatrices are only made with more than 3 communications)
-thresholds = c(4,5,10,20)
+thresholds = c(4,5,10,15, 25, 50)
 
 #set working directory and load files
 setwd("C:/Users/izwetsl/OneDrive - UvA/Documenten/2 Research/1 Papers/44. Network change - Simon/network_change")
@@ -76,53 +76,72 @@ for(type in c("VN","NVN")){
     result.thr = result[n.comm >= thr]
     df.cp = fCountCps(result.thr)
 
-    n.sign = sum(sapply(result.thr, function(x) !is.na(x[[3]])[1] && x[[9]][1]<alpha))
-    df.models = rbind(df.models, data.frame(type=type, threshold=thr,
-                                            n.models=length(result.thr),
-                                            n.models.signcp.lik=n.sign))
-
     saveRDS(df.cp,file=paste0(outputfolder,"/",type,"_significant_cps_thr",thr,".RDS"))
     write.csv(df.cp,file=paste0(outputfolder,"/",type,"_significant_cps_thr",thr,".csv"))
-
-    #################################
-    ####Plot: significant change points (same as cp_timeseries.R)####
-    #################################
-    fig<-df.cp %>%
-      gather(test,count,-c(period_dt,period_num,unix))%>%
-      ggplot(aes(period_dt,count))+
-      geom_line(size=1)+
-      ylab("Number of changepoints")+
-      ggtitle(paste0(type,", at least ",thr," communications (",length(result.thr)," models)"))+
-      facet_wrap(~ test,nrow=4,strip.position = "right")
-
-    file.fig = paste0(outputfolder,"/",type,"_significant_cps_thr",thr,".png")
-    png(file.fig,width=600,height=600)
-    plot(fig)
-    dev.off()
 
     df.all = rbind(df.all, data.frame(type=type, threshold=thr,
                                       period_dt=df.cp$period_dt,
                                       count=df.cp$cp.count.lik))
   }
 }
+###########################
+#### compare cp sequences
+##########################
+#this code reads the changepoint timeseries made by cp_timeseries_by_communications.R
+#and computes how many changepoints we loose as the minimum number of communications (thr) increases
+#split by VN and NVN
+types =c("VN" ,"NVN" )
+#read and combine all files
+df.all = data.frame()
+for(type in types){
+  for(thr in thresholds){
+    df.cp = readRDS(paste0(outputfolder,"/",type,"_significant_cps_thr",thr,".RDS"))
+    df.all = rbind(df.all, data.frame(type=type, threshold=thr, df.cp))
+  }
+}
 
-#################################
-####results for table: number of models by threshold####
-#################################
-df.models
-write.csv(df.models,file=paste0(outputfolder,"/n_models_by_threshold.csv"),row.names=FALSE)
+#total number of changepoints per type, threshold and test
+df.total <- df.all %>%
+  group_by(type, threshold) %>%
+  dplyr::summarize(across(c(cp.count.all, cp.count.lik, cp.count.aic, cp.count.bic), sum), .groups="drop") %>%
+  gather(test, n.cps, -c(type, threshold)) %>%
+  filter(test == "cp.count.lik")
 
-#################################
-####Plot: compare thresholds (significant cps, likelihood vuong test)####
-#################################
-fig<-df.all %>%
-  mutate(threshold=factor(paste0(">= ",threshold), levels=paste0(">= ",thresholds)))%>%
-  ggplot(aes(period_dt,count))+
-  geom_line(size=0.5)+
-  ylab("Number of significant changepoints (lik)")+
-  facet_grid(threshold ~ type, scales="free_y")
+#create latex table
 
-file.fig = paste0(outputfolder,"/cps_by_threshold.png")
-png(file.fig,width=900,height=200*length(thresholds))
-plot(fig)
-dev.off()
+tab <- df.total %>%
+  dplyr::select(type, threshold, n.cps) %>%
+  pivot_wider(names_from = type, values_from = n.cps) %>%   # one row per threshold, VN and NVN columns
+  dplyr::select(threshold, VN, NVN)
+
+latex.tab <- kable(tab, format = "latex", booktabs = TRUE,
+                   col.names = c("Min. communications", "VN", "NVN"),
+                   caption = "Number of significant change points (likelihood test) by communication threshold",
+                   label = "cps_by_threshold")
+latex.tab
+writeLines(latex.tab, paste0(outputfolder, "/table_cps_by_threshold.tex"))
+
+
+#### check on if the sequence for threshold =4 is the same as before
+
+setwd("C:/Users/izwetsl/OneDrive - UvA/Documenten/2 Research/1 Papers/44. Network change - Simon/network_change")
+
+new <- readRDS("analysis/results_timeseries/data_hour/by_communications/NVN_significant_cps_thr4.RDS")
+old <- readRDS("analysis/results_timeseries/data_hour/NVN_significant_cps_all.RDS")
+
+cols <- c("period_num","unix","cp.count.all","cp.count.lik","cp.count.aic","cp.count.bic")
+
+all.equal(new[, cols], old[, cols], check.attributes = FALSE)   # TRUE if identical
+colSums(new[, cols[-(1:2)]]) - colSums(old[, cols[-(1:2)]])      # difference in total cps per test (should be all 0)
+
+#if not identical: show the hours where they differ
+#diff.rows <- which(rowSums(new[, cols] != old[, cols]) > 0)
+#cbind(period_dt = new$period_dt[diff.rows], new = new[diff.rows, cols[-(1:2)]], old = old[diff.rows, cols[-(1:2)]])
+
+new <- readRDS("analysis/results_timeseries/data_hour/by_communications/VN_significant_cps_thr4.RDS")
+old <- readRDS("analysis/results_timeseries/data_hour/VN_significant_cps_all.RDS")
+
+cols <- c("period_num","unix","cp.count.all","cp.count.lik","cp.count.aic","cp.count.bic")
+
+all.equal(new[, cols], old[, cols], check.attributes = FALSE)   # TRUE if identical
+colSums(new[, cols[-(1:2)]]) - colSums(old[, cols[-(1:2)]])      # difference in total cps per test (should be all 0)

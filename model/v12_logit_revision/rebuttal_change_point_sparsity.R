@@ -86,7 +86,7 @@ list.results = for(l in 1:n.files){
   }
 }  
  
-saveRDS(df.result,file=paste0(folder,"/", outputfolder,"/cpsettings_sparcity_setting",setting,".RData"))
+saveRDS(df.result,file=paste0(folder,"/", outputfolder,"/cpsettingsr_sparcity_setting",setting,".RData"))
 
 close(pb)
 
