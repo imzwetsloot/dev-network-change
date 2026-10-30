@@ -54,6 +54,12 @@ fShareMatched <- function(x, y, delta){
   mean(sapply(x, function(a) any(abs(a - y) <= delta)))
 }
 
+#for each change point in x the distance to the closest change point in y (empty if x or y is empty)
+fDistClosest <- function(x, y){
+  if(length(x) == 0 || length(y) == 0){return(numeric(0))}
+  sapply(x, function(a) min(abs(a - y)))
+}
+
 #Hausdorff distance: largest distance from a change point to the nearest change point of the other setting
 fHausdorff <- function(x, y){
   if(length(x) == 0 && length(y) == 0){return(0)}
@@ -111,8 +117,43 @@ tab[, F1 := ifelse(n.cp_A == 0 & n.cp_B == 0, 1,
                ifelse(n.cp_A == 0 | n.cp_B == 0, 0,
                    ifelse(precision + recall == 0, 0, 2 * precision * recall / (precision + recall))))]
 tab[, hausdorff := mapply(fHausdorff, cp_A, cp_B)]
-setnames(tab, c("cp_B", "cpstr_B", "n.cp_B"),
-         paste0(c("cp_", "cpstr_", "n.cp_"), setting.compare))
+#for each change point in B: distance (hours) to the closest change point in A
+tab[, dist_B := mapply(fDistClosest, cp_B, cp_A, SIMPLIFY = FALSE)]
+tab[, diststr_B := sapply(dist_B, paste, collapse = ";")]
+setnames(tab, c("cp_B", "cpstr_B", "n.cp_B", "dist_B", "diststr_B"),
+         paste0(c("cp_", "cpstr_", "n.cp_", "dist_", "diststr_"), setting.compare))
+
+#############################################
+### distances from each change point in B to the closest change point in A
+#############################################
+
+#long table: one row per change point in B (models without change points in A or B are not included)
+has.dist = sapply(tab[[paste0("dist_", setting.compare)]], length) > 0
+dist.long <- tab[has.dist, .(cp = unlist(get(paste0("cp_", setting.compare))),
+                             dist = unlist(get(paste0("dist_", setting.compare)))),
+                 by = .(file, type)]
+
+fDistStat <- function(x){
+  q = quantile(x, probs = c(0.05, 0.10, 0.25, 0.50, 0.75, 0.90, 0.95))
+  data.table(n.cp = length(x), mean = mean(x), median = median(x), sd = sd(x),
+             q05 = q[1], q10 = q[2], q25 = q[3], q50 = q[4], q75 = q[5], q90 = q[6], q95 = q[7],
+             max = max(x), perc.within.delta = 100 * mean(x <= delta))
+}
+dist.stat <- rbind(cbind(type = "all", fDistStat(dist.long$dist)),
+                   dist.long[, fDistStat(dist), by = type])
+dist.stat[, setting := setting.compare]
+print(dist.stat)
+
+#histogram
+file.fig = paste0(outputfolder,"/fig_dist_cp_",setting.compare,"_to_A.png")
+png(file.fig, width = 600, height = 400)
+hist(dist.long$dist, breaks = 50, col = "steelblue3", border = "white",
+     main = paste0("Distance from each change point in ",setting.compare," to the closest change point in A"),
+     xlab = "Distance (hours)", ylab = "Number of change points")
+abline(v = median(dist.long$dist), lty = 2)
+abline(v = mean(dist.long$dist), lty = 3)
+legend("topright", legend = c("median", "mean"), lty = c(2, 3), bty = "n")
+dev.off()
 
 #############################################
 ### summary
@@ -140,6 +181,8 @@ print(summary.tab)
 #############################################
 
 saveRDS(tab, file = paste0(outputfolder,"/compare_cp_A_",setting.compare,".Rds"))
-tab.csv <- tab[, !c("cp_A", paste0("cp_", setting.compare)), with = FALSE]
+tab.csv <- tab[, !c("cp_A", paste0("cp_", setting.compare), paste0("dist_", setting.compare)), with = FALSE]
 write.csv(tab.csv, file = paste0(outputfolder,"/compare_cp_A_",setting.compare,".csv"), row.names = FALSE)
 write.csv(summary.tab, file = paste0(outputfolder,"/compare_cp_A_",setting.compare,"_summary.csv"), row.names = FALSE)
+write.csv(dist.long, file = paste0(outputfolder,"/dist_cp_",setting.compare,"_to_A.csv"), row.names = FALSE)
+write.csv(dist.stat, file = paste0(outputfolder,"/dist_cp_",setting.compare,"_to_A_summary.csv"), row.names = FALSE)
