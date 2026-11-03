@@ -40,92 +40,127 @@ influencers <- read.csv(file="data/influencers_list.csv")
 infl.threat <- read.csv(file="data/infl_threat.csv")
 
 ###############################################
+####### CACHED COVARIATES #####################
+###############################################
+#AC, the Wall Street dummy and the hour dummies are the same for every
+#influencer/follower. They are saved per aggregation level and loaded if
+#the file exists; otherwise they are created and saved.
+#Set rebuild.cache = TRUE to force recreating them (e.g. after changing settings.R)
+rebuild.cache = FALSE
+
+file.AC     = paste0("data/AC_",Aggregation,".csv")
+file.dWLS   = paste0("data/dummyWallStreet_",Aggregation,".csv")
+file.dHours = paste0("data/dummyHours_",Aggregation,".csv")
+
+#read a cached file, drop the row-name column and check it matches the settings
+fReadCache <- function(file){
+  dat <- read.csv(file)
+  dat$X <- NULL
+  if(nrow(dat)!=n.period){
+    stop(paste0(file," has ",nrow(dat)," rows but n.period = ",n.period,
+                ". Set rebuild.cache = TRUE to recreate it."))
+  }
+  print(paste("Loaded cached file:",file))
+  return(dat)
+}
+
+###############################################
 ####### MAKE AC column for INPUT MATRIX########
 ###############################################
 
-dum1 <- dat1%>%
-  group_by(period_num)%>%
-  dplyr::summarize(logAC=log(n()+1))
+if(!rebuild.cache && file.exists(file.AC)){
+  AC <- fReadCache(file.AC)
+}else{
+  dum1 <- dat1%>%
+    group_by(period_num)%>%
+    dplyr::summarize(logAC=log(n()+1))
 
-AC <- full_join(ts,dum1, by="period_num")
-#AC$logAC[is.na(AC$logAC)]<-0
+  AC <- full_join(ts,dum1, by="period_num")
+  #AC$logAC[is.na(AC$logAC)]<-0
 
-#plot(x=AC$period_num,y=AC$logAC)
+  #plot(x=AC$period_num,y=AC$logAC)
 
-write.csv(AC,file=paste0("data/AC_",Aggregation,".csv"))
+  write.csv(AC,file=file.AC,row.names=FALSE)
+}
 
 
 #############################################
 ### Creat dummy wallstreet open
 ############################################
-dt.utc = seq(start,end,by="min")
-df.WlStr = data.frame(unix=0,
-                      dt.utc=dt.utc,
-                      period_num=0,
-                      dt.ny=0,
-                      dOpen=0)
-df.WlStr$unix = as.numeric(df.WlStr$dt.utc)
+if(!rebuild.cache && file.exists(file.dWLS)){
+  df.dummy <- fReadCache(file.dWLS)
+}else{
+  dt.utc = seq(start,end,by="min")
+  df.WlStr = data.frame(unix=0,
+                        dt.utc=dt.utc,
+                        period_num=0,
+                        dt.ny=0,
+                        dOpen=0)
+  df.WlStr$unix = as.numeric(df.WlStr$dt.utc)
 
-df.WlStr$dt.ny=as.POSIXct(df.WlStr$unix, origin="1970-01-01",tz="EST5EDT")
-df.WlStr$period_num = fUNIXtoPeriod(df.WlStr$unix,start,Aggregationmin)
+  df.WlStr$dt.ny=as.POSIXct(df.WlStr$unix, origin="1970-01-01",tz="EST5EDT")
+  df.WlStr$period_num = fUNIXtoPeriod(df.WlStr$unix,start,Aggregationmin)
 
-#view daylight saving 1 nov 1am
-#View(df.WlStr[c(3670:3900),])
-#View daylight svaing March 14, 2021, 3:00:00 am
-#View(df.WlStr[c(6870:6900),])
+  #view daylight saving 1 nov 1am
+  #View(df.WlStr[c(3670:3900),])
+  #View daylight svaing March 14, 2021, 3:00:00 am
+  #View(df.WlStr[c(6870:6900),])
 
-#opening hours of wallstreet 9:30-16:00
-#opening hours robinhood 9:00-17:59
-Tradeopen = "09:00"
-Tradeopen = format(as.POSIXct(Tradeopen,format="%H:%M"),format="%H:%M")
-Tradeclose = "17:59"
-Tradeclose = format(as.POSIXct(Tradeclose,format="%H:%M"),format="%H:%M")
+  #opening hours of wallstreet 9:30-16:00
+  #opening hours robinhood 9:00-17:59
+  Tradeopen = "09:00"
+  Tradeopen = format(as.POSIXct(Tradeopen,format="%H:%M"),format="%H:%M")
+  Tradeclose = "17:59"
+  Tradeclose = format(as.POSIXct(Tradeclose,format="%H:%M"),format="%H:%M")
 
-bank_holiday = c("2020-07-02",#not holiday 
-                 "2020-07-03",
-                 "2020-09-07",
-                 "2020-10-12",#not holiday
-                 "2020-11-11",#not holiday
-                 "2020-11-26",
-                 "2020-11-27", #early closing
-                 "2020-12-24", #early closing
-                 "2020-12-25",
-                 "2020-12-31",#not holiday
-                 "2021-01-01",
-                 "2021-01-18",
-                 "2021-02-15",
-                 "2021-04-02",
-                 "2021-05-31")
-bank_holiday<-date(strptime(bank_holiday,format="%Y-%m-%d"))
+  bank_holiday = c("2020-07-02",#not holiday 
+                   "2020-07-03",
+                   "2020-09-07",
+                   "2020-10-12",#not holiday
+                   "2020-11-11",#not holiday
+                   "2020-11-26",
+                   "2020-11-27", #early closing
+                   "2020-12-24", #early closing
+                   "2020-12-25",
+                   "2020-12-31",#not holiday
+                   "2021-01-01",
+                   "2021-01-18",
+                   "2021-02-15",
+                   "2021-04-02",
+                   "2021-05-31")
+  bank_holiday<-date(strptime(bank_holiday,format="%Y-%m-%d"))
 
-for(t in 1:nrow(df.WlStr)){
-  dt = df.WlStr$dt.ny[t]
-  if(date(dt) %notin% bank_holiday){ #exclude bank holiday
-    if(wday(dt) %in% c(2,3,4,5,6)){ #exclude sat  & sunday
-      dt.hm = format(dt,format="%H:%M")
-      currenthour = hour(dt)
-      currentminute = minute(dt)
-      currentime = paste0(currenthour,":",currentminute)
-      currentime = format(as.POSIXct(currentime,format="%H:%M"),format="%H:%M")
-      
-      if(currentime>=Tradeopen && currentime<=Tradeclose){ #include opening hours only
-        df.WlStr$dOpen[t]=1
+  for(t in 1:nrow(df.WlStr)){
+    dt = df.WlStr$dt.ny[t]
+    if(date(dt) %notin% bank_holiday){ #exclude bank holiday
+      if(wday(dt) %in% c(2,3,4,5,6)){ #exclude sat  & sunday
+        dt.hm = format(dt,format="%H:%M")
+        currenthour = hour(dt)
+        currentminute = minute(dt)
+        currentime = paste0(currenthour,":",currentminute)
+        currentime = format(as.POSIXct(currentime,format="%H:%M"),format="%H:%M")
+        
+        if(currentime>=Tradeopen && currentime<=Tradeclose){ #include opening hours only
+          df.WlStr$dOpen[t]=1
+        }
       }
     }
   }
-}
-View(df.WlStr)
+  View(df.WlStr)
 
-#create dummy variable for each period
-df.dummy<-df.WlStr %>%
-  filter(period_num>0) %>%
-  filter(period_num<= n.period)%>%
-  group_by(period_num)%>%
-  dplyr::summarise(dummy = mean(dOpen))%>%
-  dplyr::select(period_num,dummy)
+  #create dummy variable for each period
+  df.dummy<-df.WlStr %>%
+    filter(period_num>0) %>%
+    filter(period_num<= n.period)%>%
+    group_by(period_num)%>%
+    dplyr::summarise(dummy = mean(dOpen))%>%
+    dplyr::select(period_num,dummy)
 
-if(nrow(df.dummy)!=n.period){stop("something wrong")}
-if(all(df.dummy$period_num!=ts$period_num)){stop("Something wrong")}
+  if(nrow(df.dummy)!=n.period){stop("something wrong")}
+  if(all(df.dummy$period_num!=ts$period_num)){stop("Something wrong")}
+
+  write.csv(df.dummy,file=file.dWLS,row.names=FALSE)
+} #end create dummy wallstreet
 
 dummyWallStreet <- df.dummy$dummy
 
@@ -148,21 +183,27 @@ dummyWallStreet <- df.dummy$dummy
 #############################################
 ### Create dummy matrix for each hour
 ############################################
-dummyHours = matrix(0,nrow=n.period,ncol=24)
+if(!rebuild.cache && file.exists(file.dHours)){
+  dummyHours <- fReadCache(file.dHours)
+}else{
+  dummyHours = matrix(0,nrow=n.period,ncol=24)
 
-for(t in 1:n.period){
-  hour.idx= hour(ts$period_dt[t])
-  if(hour.idx==0){
-    col.idx=24
-  }else{col.idx=hour.idx}
-  dummyHours[t,col.idx] = 1
+  for(t in 1:n.period){
+    hour.idx= hour(ts$period_dt[t])
+    if(hour.idx==0){
+      col.idx=24
+    }else{col.idx=hour.idx}
+    dummyHours[t,col.idx] = 1
+  }
+
+  dummyHours = as.data.frame(dummyHours)
+  colnames(dummyHours) <- c("hr1","hr2","hr3","hr4","hr5",
+                            "hr6","hr7","hr8","hr9","hr10","hr11",
+                            "hr12","hr13","hr14","hr15","hr16","hr17",
+                            "hr18","hr19","hr20","hr21","hr22","hr23","hr24")
+
+  write.csv(dummyHours,file=file.dHours,row.names=FALSE)
 }
-
-dummyHours = as.data.frame(dummyHours)
-colnames(dummyHours) <- c("hr1","hr2","hr3","hr4","hr5",
-                          "hr6","hr7","hr8","hr9","hr10","hr11",
-                          "hr12","hr13","hr14","hr15","hr16","hr17",
-                          "hr18","hr19","hr20","hr21","hr22","hr23","hr24")
 
 ############################################
 ####### MAKE INFLUENCER INPUT MATRIX########
