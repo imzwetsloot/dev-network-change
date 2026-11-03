@@ -18,10 +18,12 @@ lapply(libraries, library, quietly = TRUE, character.only = TRUE)
 Aggregation = "5minute";Aggregationmin=5; folder= "data_5min"  
 
 #set working directory 
-setwd("F:/Reddit_project/Github")
+setwd("/home/izwetsloot/network-change/network_change")
 #setwd("C:/Users/inez_/Documents/2 Research/1 Papers/44. Network change - Simon/Github")
-source('model/v11_logit_utc/timeconversion.R')
-source('model/v11_logit_utc/settings.R')
+
+
+source('model/v12_logit_revision/timeconversion.R')
+source('model/v12_logit_revision/settings.R')
 
 #manual defined function to filter on 'not in'
 `%notin%` <- Negate(`%in%`)
@@ -173,6 +175,13 @@ n.infl=length(influencers$influencer)
 for(i in 1:n.infl){
   print(paste(i," out of ",n.infl))
   infl = influencers$influencer[i]
+  
+  #check if file already ran, if yes skip
+  file=paste0("data/",folder,"/inputmatrix/infl_",infl,".csv")
+  if(file.exists(file=dum)){
+    return()
+  }
+  
   
   #create input.matrix for each influencer
   X= data.frame(period_num = ts$period_num,
@@ -329,6 +338,12 @@ for(i in 1:n.infl){
   list.results = foreach(j = 1:n.fol, .options.snow = opts) %dopar% {
     progress(j)
     fol = followers[j]
+    
+    #check if file already ran, if yes skip
+    file=paste0("data/",folder,"/inputmatrix/fol_",fol,"_infl_",infl,".csv")
+    if(file.exists(file=dum)){
+      return("already done")
+    }
     
     #create input.matrix 
     X= data.frame(period_num = period_num,
