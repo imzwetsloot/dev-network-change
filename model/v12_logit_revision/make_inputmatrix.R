@@ -130,23 +130,15 @@ if(!rebuild.cache && file.exists(file.dWLS)){
                    "2021-05-31")
   bank_holiday<-date(strptime(bank_holiday,format="%Y-%m-%d"))
 
-  for(t in 1:nrow(df.WlStr)){
-    dt = df.WlStr$dt.ny[t]
-    if(date(dt) %notin% bank_holiday){ #exclude bank holiday
-      if(wday(dt) %in% c(2,3,4,5,6)){ #exclude sat  & sunday
-        dt.hm = format(dt,format="%H:%M")
-        currenthour = hour(dt)
-        currentminute = minute(dt)
-        currentime = paste0(currenthour,":",currentminute)
-        currentime = format(as.POSIXct(currentime,format="%H:%M"),format="%H:%M")
-        
-        if(currentime>=Tradeopen && currentime<=Tradeclose){ #include opening hours only
-          df.WlStr$dOpen[t]=1
-        }
-      }
-    }
-  }
-  View(df.WlStr)
+  #vectorised over all minutes (replaces a row-by-row loop, same result)
+  #times are New York time; "HH:MM" strings compare correctly as text
+  dt.ny.hm = format(df.WlStr$dt.ny,format="%H:%M")
+  df.WlStr$dOpen = as.numeric(
+    date(df.WlStr$dt.ny) %notin% bank_holiday &  #exclude bank holiday
+    wday(df.WlStr$dt.ny) %in% c(2,3,4,5,6) &     #exclude sat & sunday
+    dt.ny.hm >= Tradeopen & dt.ny.hm <= Tradeclose #include opening hours only
+  )
+  #View(df.WlStr)
 
   #create dummy variable for each period
   df.dummy<-df.WlStr %>%
