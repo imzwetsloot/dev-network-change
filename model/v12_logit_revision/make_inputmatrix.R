@@ -7,7 +7,7 @@
 rm(list=ls(all=TRUE))
 
 #load library
-libraries = c("kableExtra","doSNOW", "foreach","MASS","tidyr","knitr","lubridate","dplyr","xts","ggplot2","igraph")
+libraries = c("kableExtra","doSNOW", "foreach","MASS","tidyr","knitr","lubridate","dplyr","xts","ggplot2","igraph","here")
 lapply(libraries, function(x) if (!(x %in% installed.packages())) {
   install.packages(x)
 })
@@ -17,11 +17,12 @@ lapply(libraries, library, quietly = TRUE, character.only = TRUE)
 #Aggregation = "hour" ; Aggregationmin=60; folder="data_hour"
 Aggregation = "5minute";Aggregationmin=5; folder= "data_5min"  
 
-#set working directory 
-setwd("F:/Reddit_project/Github")
-#setwd("C:/Users/inez_/Documents/2 Research/1 Papers/44. Network change - Simon/Github")
-source('model/v11_logit_utc/timeconversion.R')
-source('model/v11_logit_utc/settings.R')
+#set working directory to the repository root (located via the .git folder),
+#so all relative paths below ("data/...", model_dir) work on any machine
+setwd(here::here())
+model_dir <- "model/v12_logit_revision"
+source(file.path(model_dir, "timeconversion.R"))
+source(file.path(model_dir, "settings.R"))
 
 #manual defined function to filter on 'not in'
 `%notin%` <- Negate(`%in%`)
