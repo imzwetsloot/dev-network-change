@@ -7,19 +7,21 @@
 rm(list=ls(all=TRUE))
 
 #load library
-libraries = c("kableExtra","doSNOW", "foreach","MASS","tidyr","knitr","lubridate","dplyr","xts","ggplot2","igraph","here")
+libraries = c("kableExtra","doSNOW", "foreach","MASS","tidyr","knitr","lubridate","dplyr","xts","ggplot2","igraph","here","gtools")
 lapply(libraries, function(x) if (!(x %in% installed.packages())) {
   install.packages(x)
 })
 lapply(libraries, library, quietly = TRUE, character.only = TRUE)
 
 #####
-#Aggregation = "hour" ; Aggregationmin=60; folder="data_hour"
-Aggregation = "5minute";Aggregationmin=5; folder= "data_5min"  
+Aggregation = "hour" ; Aggregationmin=60; folder="data_hour"
+#Aggregation = "5minute";Aggregationmin=5; folder= "data_5min"  
+setting = 'A'
 
 #set working directory to the repository root (located via the .git folder),
 #so all relative paths below ("data/...", model_dir) work on any machine
-setwd(here::here())
+#setwd(here::here())
+setwd("C:/Users/izwetsl/OneDrive - UvA/Documenten/2 Research/1 Papers/44. Network change - Simon/network_change")
 model_dir <- "model/v12_logit_revision"
 source(file.path(model_dir, "timeconversion.R"))
 source(file.path(model_dir, "settings.R"))
@@ -40,12 +42,12 @@ influencers <- read.csv(file="data/influencers_list.csv")
 infl.threat <- read.csv(file="data/infl_threat.csv")
 
 ###############################################
-####### CACHED COVARIATES #####################
+####### SAVED COVARIATES #####################
 ###############################################
 #AC, the Wall Street dummy and the hour dummies are the same for every
 #influencer/follower. They are saved per aggregation level and loaded if
 #the file exists; otherwise they are created and saved.
-#Set rebuild.cache = TRUE to force recreating them (e.g. after changing settings.R)
+#Set rebuild.cache = TRUE to force recreating them 
 rebuild.cache = FALSE
 
 file.AC     = paste0("data/AC_",Aggregation,".csv")
@@ -74,12 +76,7 @@ if(!rebuild.cache && file.exists(file.AC)){
   dum1 <- dat1%>%
     group_by(period_num)%>%
     dplyr::summarize(logAC=log(n()+1))
-
   AC <- full_join(ts,dum1, by="period_num")
-  #AC$logAC[is.na(AC$logAC)]<-0
-
-  #plot(x=AC$period_num,y=AC$logAC)
-
   write.csv(AC,file=file.AC,row.names=FALSE)
 }
 
@@ -87,6 +84,7 @@ if(!rebuild.cache && file.exists(file.AC)){
 #############################################
 ### Creat dummy wallstreet open
 ############################################
+
 if(!rebuild.cache && file.exists(file.dWLS)){
   df.dummy <- fReadCache(file.dWLS)
 }else{
@@ -97,22 +95,15 @@ if(!rebuild.cache && file.exists(file.dWLS)){
                         dt.ny=0,
                         dOpen=0)
   df.WlStr$unix = as.numeric(df.WlStr$dt.utc)
-
+  
   df.WlStr$dt.ny=as.POSIXct(df.WlStr$unix, origin="1970-01-01",tz="EST5EDT")
   df.WlStr$period_num = fUNIXtoPeriod(df.WlStr$unix,start,Aggregationmin)
-
-  #view daylight saving 1 nov 1am
-  #View(df.WlStr[c(3670:3900),])
-  #View daylight svaing March 14, 2021, 3:00:00 am
-  #View(df.WlStr[c(6870:6900),])
-
-  #opening hours of wallstreet 9:30-16:00
-  #opening hours robinhood 9:00-17:59
+  
   Tradeopen = "09:00"
   Tradeopen = format(as.POSIXct(Tradeopen,format="%H:%M"),format="%H:%M")
   Tradeclose = "17:59"
   Tradeclose = format(as.POSIXct(Tradeclose,format="%H:%M"),format="%H:%M")
-
+  
   bank_holiday = c("2020-07-02",#not holiday 
                    "2020-07-03",
                    "2020-09-07",
@@ -129,16 +120,23 @@ if(!rebuild.cache && file.exists(file.dWLS)){
                    "2021-04-02",
                    "2021-05-31")
   bank_holiday<-date(strptime(bank_holiday,format="%Y-%m-%d"))
-
-  #vectorised over all minutes (replaces a row-by-row loop, same result)
-  #times are New York time; "HH:MM" strings compare correctly as text
-  dt.ny.hm = format(df.WlStr$dt.ny,format="%H:%M")
-  df.WlStr$dOpen = as.numeric(
-    date(df.WlStr$dt.ny) %notin% bank_holiday &  #exclude bank holiday
-    wday(df.WlStr$dt.ny) %in% c(2,3,4,5,6) &     #exclude sat & sunday
-    dt.ny.hm >= Tradeopen & dt.ny.hm <= Tradeclose #include opening hours only
-  )
-  #View(df.WlStr)
+  
+  for(t in 1:nrow(df.WlStr)){
+    dt = df.WlStr$dt.ny[t]
+    if(date(dt) %notin% bank_holiday){ #exclude bank holiday
+      if(wday(dt) %in% c(2,3,4,5,6)){ #exclude sat  & sunday
+        dt.hm = format(dt,format="%H:%M")
+        currenthour = hour(dt)
+        currentminute = minute(dt)
+        currentime = paste0(currenthour,":",currentminute)
+        currentime = format(as.POSIXct(currentime,format="%H:%M"),format="%H:%M")
+        
+        if(currentime>=Tradeopen && currentime<=Tradeclose){ #include opening hours only
+          df.WlStr$dOpen[t]=1
+        }
+      }
+    }
+  }
 
   #create dummy variable for each period
   df.dummy<-df.WlStr %>%
@@ -147,30 +145,15 @@ if(!rebuild.cache && file.exists(file.dWLS)){
     group_by(period_num)%>%
     dplyr::summarise(dummy = mean(dOpen))%>%
     dplyr::select(period_num,dummy)
-
+  
   if(nrow(df.dummy)!=n.period){stop("something wrong")}
   if(all(df.dummy$period_num!=ts$period_num)){stop("Something wrong")}
-
+  
   write.csv(df.dummy,file=file.dWLS,row.names=FALSE)
-} #end create dummy wallstreet
+}
 
 dummyWallStreet <- df.dummy$dummy
 
-#test length of weekends and nights
-# vN=rep(0,400)
-# idx = 1
-# for(i in 1:nrow(df.dummy)){
-#   if(df.dummy$dummy[i]==0){
-#     switch=FALSE
-#     vN[idx]=vN[idx]+1
-#   }else{
-#     if(!switch){
-#       idx=idx+1
-#     }
-#     switch=TRUE
-#   }
-# }
-# table(vN)
 
 #############################################
 ### Create dummy matrix for each hour
@@ -179,7 +162,7 @@ if(!rebuild.cache && file.exists(file.dHours)){
   dummyHours <- fReadCache(file.dHours)
 }else{
   dummyHours = matrix(0,nrow=n.period,ncol=24)
-
+  
   for(t in 1:n.period){
     hour.idx= hour(ts$period_dt[t])
     if(hour.idx==0){
@@ -187,14 +170,30 @@ if(!rebuild.cache && file.exists(file.dHours)){
     }else{col.idx=hour.idx}
     dummyHours[t,col.idx] = 1
   }
-
+  
   dummyHours = as.data.frame(dummyHours)
   colnames(dummyHours) <- c("hr1","hr2","hr3","hr4","hr5",
                             "hr6","hr7","hr8","hr9","hr10","hr11",
                             "hr12","hr13","hr14","hr15","hr16","hr17",
                             "hr18","hr19","hr20","hr21","hr22","hr23","hr24")
-
   write.csv(dummyHours,file=file.dHours,row.names=FALSE)
+}
+
+############################################
+####### parralalize making input matrices########
+############################################
+
+#number of processes to use
+processes = 10
+
+if (processes > 1) {
+  cl <- makeCluster(processes)
+  clusterEvalQ(cl, library(dplyr))
+  clusterEvalQ(cl, library(tidyr))
+  clusterEvalQ(cl, library(lubridate))
+  registerDoSNOW(cl)
+} else {
+  registerDoSEQ()
 }
 
 ############################################
@@ -204,9 +203,20 @@ if(!rebuild.cache && file.exists(file.dHours)){
 n.infl=length(influencers$influencer)
 
 #loop over each influencer
-for(i in 1:n.infl){
-  print(paste(i," out of ",n.infl))
+pb <- txtProgressBar(max = n.infl, style = 3)
+opts <- list(progress = function(n) setTxtProgressBar(pb, n))
+
+list.infl = foreach(i = 1:n.infl, .packages = c("dplyr","lubridate"),
+                    .options.snow = opts) %dopar% {
+              
   infl = influencers$influencer[i]
+  
+  #check if file already ran, if yes skip
+  file=paste0("data/",folder,"/inputmatrix/infl_",infl,".csv")
+  if(file.exists(file=file)){
+    return()
+  }
+  
   
   #create input.matrix for each influencer
   X= data.frame(period_num = ts$period_num,
@@ -252,8 +262,8 @@ for(i in 1:n.infl){
   X$ACin = ACin$logACin
   
   #ACthreat
-  threat.id <- infl.threat$threat[which(infl.threat==infl)] #all threat send by infl
-  
+  threat.id <- infl.threat$threat[which(infl.threat$influencer==infl)] #all threat send by infl
+
   dum <- dat1%>%
     filter(threat %in% threat.id)%>%
     filter(to != infl)%>%
@@ -285,41 +295,22 @@ for(i in 1:n.infl){
   
   X <- cbind(X,dummyHours)
   write.csv(X,file=paste0("data/",folder,"/inputmatrix/infl_",infl,".csv"))
-  
+  return(paste0("done_infl_", infl))
 }
+close(pb)
+
+
 
 
 ############################################
-####### MAKE FOLLOWERS INPUT MATRIX########
+####### MAKE FOLLOWERS INPUT MATRIX#########
 ############################################
 
-#number of processes to use
-processes = 10
-
-# Parallelization over the rolling windows
-if (processes > 1) {
-  cl <- makeCluster(processes)
-  clusterEvalQ(cl, library(foreach))
-  # clusterEvalQ(cl, library(MASS))
-  clusterEvalQ(cl, library(dplyr))
-  clusterEvalQ(cl, library(tidyr))
-  clusterEvalQ(cl, library(lubridate))
-  clusterEvalQ(cl, library(stats))
-  clusterEvalQ(cl, library(gtools))
-  #  registerDoParallel(cl)
-  registerDoSNOW(cl)
-} else {
-  registerDoSEQ()
-}
 
 ##All threats posted by senders
 posted.threats <- dat1%>% 
   filter(threat==comment)%>%
   dplyr::select(from,threat,period_num)
-
-############################################
-####### MAKE FOLLOWERS INPUT MATRIX#########
-############################################
 
 #influencers = read.csv(file="influencers_list.csv")
 n.infl=nrow(influencers)
@@ -363,6 +354,12 @@ for(i in 1:n.infl){
   list.results = foreach(j = 1:n.fol, .options.snow = opts) %dopar% {
     progress(j)
     fol = followers[j]
+    
+    #check if file already ran, if yes skip
+    file=paste0("data/",folder,"/inputmatrix/fol_",fol,"_infl_",infl,".csv")
+    if(file.exists(file=dum)){
+      return("already done")
+    }
     
     #create input.matrix 
     X= data.frame(period_num = period_num,
